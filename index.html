@@ -6694,32 +6694,21 @@ function exitPkBattleUi(){
 // Dùng chung cho cả tự động (khi vào trận trên mobile) lẫn thủ công (nút "🔄 Xoay ngang"): yêu cầu toàn màn hình
 // rồi khoá xoay sang ngang. showToastOnFail=true chỉ hiện thông báo lỗi khi người dùng CHỦ ĐỘNG bấm nút.
 function pkAttemptLandscapeLock(showToastOnFail){
+  // Không dùng Fullscreen API nữa — nó khiến trình duyệt (Chrome Android) tự hiện popup hệ thống nhắc
+  // "kéo từ trên xuống để thoát toàn màn hình", gây khó chịu. Chỉ khoá xoay ngang, không ép toàn màn hình.
   const btn = document.getElementById('pkRotateBtn');
-  const doLock = function(){
-    try{
-      if(screen.orientation && typeof screen.orientation.lock === 'function'){
-        screen.orientation.lock('landscape').then(function(){
-          if(btn) btn.classList.add('active');
-        }).catch(function(){
-          if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
-        });
-      } else if(showToastOnFail){
-        toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
-      }
-    }catch(e){
-      if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
-    }
-  };
   try{
-    const el = document.documentElement;
-    const reqFs = el.requestFullscreen || el.webkitRequestFullscreen;
-    if(!document.fullscreenElement && reqFs){
-      reqFs.call(el).then(doLock).catch(doLock);
-    } else {
-      doLock();
+    if(screen.orientation && typeof screen.orientation.lock === 'function'){
+      screen.orientation.lock('landscape').then(function(){
+        if(btn) btn.classList.add('active');
+      }).catch(function(){
+        if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
+      });
+    } else if(showToastOnFail){
+      toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
     }
   }catch(e){
-    doLock();
+    if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
   }
 }
 window.togglePkLandscape = function(){
