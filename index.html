@@ -2214,6 +2214,7 @@ window.addEventListener('unhandledrejection', function(ev){
         <div style="flex:1; font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:#fff;" id="dungeonBattleMapTitle"></div>
         <button type="button" class="btn btn-ghost speed-toggle-btn" onclick="setBattleSpeed(2)" style="padding:8px 10px; font-size:11px;">⚡ x2</button>
         <button type="button" class="btn btn-ghost speed-toggle-btn" onclick="setBattleSpeed(4)" style="padding:8px 10px; font-size:11px;">⚡ x4</button>
+        <button type="button" class="btn btn-ghost speed-toggle-btn" id="dungeonRotateBtn" onclick="toggleDungeonLandscape()" style="padding:8px 10px; font-size:12px; flex-shrink:0;" title="Xoay ngang màn hình để Vượt Ải">🔄 Xoay ngang</button>
         <button type="button" class="btn btn-primary" id="dungeonSkipBtn" onclick="skipDungeonBattle()" style="padding:8px 12px; font-size:11px; display:none;">⏭ Bỏ qua</button>
       </div>
       <div class="sec-label" id="monsterSecLabel">Chạm trán</div>
@@ -2490,6 +2491,16 @@ window.addEventListener('unhandledrejection', function(ev){
         <div class="mini-field"><label>Số lượng rớt</label><input type="number" id="mon_bulkMatQty" value="1" min="1"></div>
         <button class="btn btn-ghost" id="mon_bulkMatApply" style="width:100%;">🎁 Áp dụng cho quái đang lọc</button>
         <div class="auth-msg" id="mon_bulkMatMsg" style="margin-top:8px;"></div>
+        <div class="sec-label" style="margin:12px 0 6px;">🎁 Áp dụng nguyên liệu rớt PHỤ hàng loạt (rớt thêm, ngoài nguyên liệu chính ở trên — mỗi dòng tự tính tỷ lệ riêng — theo đúng bộ lọc cấp ở trên)</div>
+        <div id="mon_bulkExtraDropsList" style="margin-bottom:6px;"></div>
+        <div class="field-row">
+          <div class="mini-field"><label>Tên nguyên liệu phụ</label><input id="mon_bulkExtraMatName" placeholder="vd: Vải"></div>
+          <div class="mini-field"><label>Tỷ lệ rớt %</label><input type="number" id="mon_bulkExtraMatRate" value="10" min="0" max="100"></div>
+        </div>
+        <div class="mini-field"><label>Số lượng rớt</label><input type="number" id="mon_bulkExtraMatQty" value="1" min="1"></div>
+        <button class="btn btn-ghost" type="button" id="mon_bulkExtraDropAdd" style="width:100%; margin-bottom:8px;">+ Thêm vào danh sách rớt phụ hàng loạt</button>
+        <button class="btn btn-ghost" id="mon_bulkExtraApply" style="width:100%;">🎁 Áp dụng rớt phụ cho quái đang lọc</button>
+        <div class="auth-msg" id="mon_bulkExtraMsg" style="margin-top:8px;"></div>
         <div class="admin-list" id="mon_list"></div>
 
         <div class="sec-label" style="margin:16px 0 8px;">🎲 Tạo quái ngẫu nhiên theo khoảng cấp (mạnh dần theo thứ tự)</div>
@@ -5405,6 +5416,7 @@ function closeTab(id){
     dungeonAutoAttackOn = false;
     dungeonViewMode = 'map';
     document.body.classList.remove('dungeon-battle-open');
+    try{ if(typeof dungeonExitLandscape==='function') dungeonExitLandscape(); }catch(e){}
     try{ closeDungeonRageChoice(); }catch(e){}
     const batP = document.getElementById('dungeonBattlePanel');
     if(batP){ batP.classList.remove('dungeon-fs'); batP.style.display = 'none'; }
@@ -10787,6 +10799,7 @@ function showDungeonPanels(){
   const batP = document.getElementById('dungeonBattlePanel');
   if(!mapP || !batP) return;
   const battle = dungeonViewMode === 'battle';
+  const wasBattle = document.body.classList.contains('dungeon-battle-open');
   mapP.style.display = battle ? 'none' : '';
   batP.style.display = battle ? 'flex' : 'none';
   batP.classList.toggle('dungeon-fs', battle);
@@ -10797,7 +10810,72 @@ function showDungeonPanels(){
     const map = CONFIG.maps.find(m=>m.id===selectedMapId);
     title.textContent = map ? map.name : '';
   }
+  // Vào màn chạm trán Vượt Ải trên mobile (đang ở chiều dọc) thì tự động xoay ngang màn hình luôn — giống PK.
+  // Thất bại thì bỏ qua âm thầm vì đây là hành động tự động, không phải người dùng chủ động bấm.
+  if(battle && !wasBattle){
+    try{
+      const isPortraitNow = !screen.orientation || /portrait/.test(screen.orientation.type||'');
+      const isMobileLike = ('ontouchstart' in window) || (navigator.maxTouchPoints||0) > 0;
+      if(isMobileLike && isPortraitNow) dungeonAttemptLandscapeLock(false);
+    }catch(e){}
+  } else if(!battle && wasBattle){
+    dungeonExitLandscape();
+  }
 }
+// Bỏ khoá xoay ngang + thoát toàn màn hình khi rời màn chạm trán Vượt Ải (bấm "Bản đồ", đóng tab, thua/thắng xong...).
+function dungeonExitLandscape(){
+  try{
+    if(screen.orientation && typeof screen.orientation.unlock === 'function') screen.orientation.unlock();
+  }catch(e){}
+  try{
+    const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+    if(isFs){
+      const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+      if(exitFs) exitFs.call(document).catch(function(){});
+    }
+  }catch(e){}
+  try{ const rb = document.getElementById('dungeonRotateBtn'); if(rb) rb.classList.remove('active'); }catch(e){}
+}
+// Dùng chung cho cả tự động (khi vào chạm trán trên mobile) lẫn thủ công (nút "🔄 Xoay ngang" ở Vượt Ải):
+// yêu cầu toàn màn hình rồi khoá xoay sang ngang. showToastOnFail=true chỉ hiện thông báo lỗi khi người dùng CHỦ ĐỘNG bấm nút.
+function dungeonAttemptLandscapeLock(showToastOnFail){
+  const btn = document.getElementById('dungeonRotateBtn');
+  const doLock = function(){
+    try{
+      if(screen.orientation && typeof screen.orientation.lock === 'function'){
+        screen.orientation.lock('landscape').then(function(){
+          if(btn) btn.classList.add('active');
+        }).catch(function(){
+          if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
+        });
+      } else if(showToastOnFail){
+        toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
+      }
+    }catch(e){
+      if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
+    }
+  };
+  try{
+    const el = document.documentElement;
+    const reqFs = el.requestFullscreen || el.webkitRequestFullscreen;
+    if(!document.fullscreenElement && reqFs){
+      reqFs.call(el).then(doLock).catch(doLock);
+    } else {
+      doLock();
+    }
+  }catch(e){
+    doLock();
+  }
+}
+window.toggleDungeonLandscape = function(){
+  const alreadyLandscape = screen.orientation && /landscape/.test(screen.orientation.type||'');
+  if(alreadyLandscape){
+    // Đang ở chế độ ngang rồi -> bấm để quay lại dọc
+    dungeonExitLandscape();
+    return;
+  }
+  dungeonAttemptLandscapeLock(true);
+};
 function renderDungeonTab(){
   const sel = document.getElementById('dungeonMapSelect');
   if(sel){
@@ -10895,7 +10973,6 @@ window.backToDungeonMap = function(){
   dungeonMonster = null;
   dungeonOutcome = null;
   battleLogEntries = [];
-  document.body.classList.remove('dungeon-battle-open');
   showDungeonPanels();
   renderDungeonTab();
 };
@@ -13183,6 +13260,64 @@ document.getElementById('mon_bulkMatApply').addEventListener('click', async ()=>
   msg.textContent = `Đã áp dụng +${matQty} ${matName} (${matRate}%) cho ${targets.length} ${scopeLabel}.`;
   msg.className = 'auth-msg ok';
   toast(`Đã áp dụng nguyên liệu rớt cho ${targets.length} quái!`);
+});
+// Danh sách nháp "nguyên liệu rớt phụ" dùng để ÁP DỤNG HÀNG LOẠT (theo bộ lọc cấp ở mục Tạo quái) — độc lập với
+// danh sách nháp của form sửa từng quái (monExtraDropsDraft) ở bên dưới, vì đây là công cụ áp dụng nhiều quái cùng lúc.
+let monBulkExtraDropsDraft = [];
+function renderMonBulkExtraDropsDraft(){
+  const box = document.getElementById('mon_bulkExtraDropsList');
+  if(!box) return;
+  if(!monBulkExtraDropsDraft.length){ box.innerHTML = '<div class="empty-note" style="padding:4px 0; font-size:11px;">Chưa có nguyên liệu rớt phụ nào trong danh sách áp dụng hàng loạt</div>'; return; }
+  box.innerHTML = monBulkExtraDropsDraft.map((d,idx)=>`
+    <div class="refine-row" style="align-items:center; gap:6px; margin-bottom:4px;">
+      ${materialIconHtml(d.matName,16)}
+      <span style="flex:1;"><b>${d.matName}</b> · ${d.matRate}% · +${d.matQty}</span>
+      <button class="del" type="button" onclick="removeMonBulkExtraDrop(${idx})">✕</button>
+    </div>`).join('');
+}
+window.removeMonBulkExtraDrop = function(idx){
+  monBulkExtraDropsDraft.splice(idx,1);
+  renderMonBulkExtraDropsDraft();
+};
+renderMonBulkExtraDropsDraft();
+document.getElementById('mon_bulkExtraDropAdd').addEventListener('click', ()=>{
+  const name = (document.getElementById('mon_bulkExtraMatName').value||'').trim();
+  if(!name){ toast('Nhập tên nguyên liệu phụ'); return; }
+  const rate = Math.max(0, Math.min(100, Number(document.getElementById('mon_bulkExtraMatRate').value)||0));
+  const qty = Math.max(1, Number(document.getElementById('mon_bulkExtraMatQty').value)||1);
+  monBulkExtraDropsDraft.push({ matName:name, matRate:rate, matQty:qty });
+  document.getElementById('mon_bulkExtraMatName').value = '';
+  document.getElementById('mon_bulkExtraMatRate').value = 10;
+  document.getElementById('mon_bulkExtraMatQty').value = 1;
+  renderMonBulkExtraDropsDraft();
+});
+document.getElementById('mon_bulkExtraApply').addEventListener('click', async ()=>{
+  const msg = document.getElementById('mon_bulkExtraMsg');
+  if(!monBulkExtraDropsDraft.length){ msg.textContent = 'Hãy thêm ít nhất 1 dòng nguyên liệu rớt phụ vào danh sách trước.'; msg.className = 'auth-msg err'; return; }
+  const filterSel = document.getElementById('mon_listLevelFilter');
+  let targets = CONFIG.monsters;
+  let scopeLabel = 'TẤT CẢ quái';
+  if(filterSel && filterSel.value){
+    const [lo,hi] = filterSel.value.split('-').map(Number);
+    targets = CONFIG.monsters.filter(m=> (m.level||1) >= lo && (m.level||1) <= hi);
+    scopeLabel = `quái cấp ${lo}-${hi}`;
+  }
+  if(!targets.length){ msg.textContent = 'Không có quái nào khớp bộ lọc hiện tại.'; msg.className = 'auth-msg err'; return; }
+  // Mỗi dòng trong danh sách áp dụng hàng loạt tự tính tỷ lệ riêng, cùng nguyên liệu chính (nếu có) là rớt độc lập.
+  // Nếu quái đã có sẵn 1 dòng rớt phụ trùng tên nguyên liệu thì cập nhật lại tỷ lệ/số lượng, chưa có thì thêm mới.
+  targets.forEach(m=>{
+    if(!Array.isArray(m.extraDrops)) m.extraDrops = [];
+    monBulkExtraDropsDraft.forEach(d=>{
+      const existing = m.extraDrops.find(x=>x.matName === d.matName);
+      if(existing){ existing.matRate = d.matRate; existing.matQty = d.matQty; }
+      else m.extraDrops.push({ matName:d.matName, matRate:d.matRate, matQty:d.matQty });
+    });
+  });
+  await saveConfig('monsters');
+  renderMonList();
+  msg.textContent = `Đã áp dụng ${monBulkExtraDropsDraft.length} dòng nguyên liệu rớt phụ cho ${targets.length} ${scopeLabel}.`;
+  msg.className = 'auth-msg ok';
+  toast(`Đã áp dụng nguyên liệu rớt phụ cho ${targets.length} quái!`);
 });
 // Danh sách nháp "nguyên liệu rớt phụ" đang chỉnh sửa cho quái hiện tại trong form (thêm được nhiều dòng, mỗi dòng tỷ lệ riêng)
 let monExtraDropsDraft = [];
