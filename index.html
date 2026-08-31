@@ -472,7 +472,7 @@ window.addEventListener('unhandledrejection', function(ev){
   }
   #dungeonBattlePanel.dungeon-fs .battle-stage .encounter-vs{
     min-height: min(36vh, 280px);
-    align-items:flex-end; margin-bottom:4px;
+    align-items:flex-start; margin-bottom:4px;
     gap: clamp(28px, 10vw, 56px);
     justify-content: space-evenly;
   }
@@ -1522,7 +1522,7 @@ window.addEventListener('unhandledrejection', function(ev){
     100%{ transform:translate(-50%,-46px) scale(1); opacity:0; }
   }
   .encounter-vs .vs-mark{font-family:'Cinzel',serif; color:var(--text-dim); font-size:12.5px; flex-shrink:0; padding-top:22px;}
-  .hpbar-track{height:8px; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:5px; overflow:hidden;}
+  .hpbar-track{width:78%; margin:0 auto; height:8px; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:5px; overflow:hidden;}
   .hpbar-fill{height:100%; border-radius:5px; transition:width .3s ease;}
   .hpbar-fill.ply{background:linear-gradient(90deg,var(--malachite),#1c9c85);}
   .hpbar-fill.mon{background:linear-gradient(90deg,#ff5c5c,#a51c1c);}
@@ -2214,12 +2214,10 @@ window.addEventListener('unhandledrejection', function(ev){
         <div style="flex:1; font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:#fff;" id="dungeonBattleMapTitle"></div>
         <button type="button" class="btn btn-ghost speed-toggle-btn" onclick="setBattleSpeed(2)" style="padding:8px 10px; font-size:11px;">⚡ x2</button>
         <button type="button" class="btn btn-ghost speed-toggle-btn" onclick="setBattleSpeed(4)" style="padding:8px 10px; font-size:11px;">⚡ x4</button>
-        <button type="button" class="btn btn-ghost speed-toggle-btn" id="dungeonRotateBtn" onclick="toggleDungeonLandscape()" style="padding:8px 10px; font-size:12px; flex-shrink:0;" title="Xoay ngang màn hình để Vượt Ải">🔄 Xoay ngang</button>
         <button type="button" class="btn btn-primary" id="dungeonSkipBtn" onclick="skipDungeonBattle()" style="padding:8px 12px; font-size:11px; display:none;">⏭ Bỏ qua</button>
       </div>
       <div class="sec-label" id="monsterSecLabel">Chạm trán</div>
       <div class="encounter-card" id="dungeonEncounter"></div>
-      <div class="battle-log" id="battleLog"></div>
     </div>
   </div>
 </div>
@@ -5416,7 +5414,6 @@ function closeTab(id){
     dungeonAutoAttackOn = false;
     dungeonViewMode = 'map';
     document.body.classList.remove('dungeon-battle-open');
-    try{ if(typeof dungeonExitLandscape==='function') dungeonExitLandscape(); }catch(e){}
     try{ closeDungeonRageChoice(); }catch(e){}
     const batP = document.getElementById('dungeonBattlePanel');
     if(batP){ batP.classList.remove('dungeon-fs'); batP.style.display = 'none'; }
@@ -10799,7 +10796,6 @@ function showDungeonPanels(){
   const batP = document.getElementById('dungeonBattlePanel');
   if(!mapP || !batP) return;
   const battle = dungeonViewMode === 'battle';
-  const wasBattle = document.body.classList.contains('dungeon-battle-open');
   mapP.style.display = battle ? 'none' : '';
   batP.style.display = battle ? 'flex' : 'none';
   batP.classList.toggle('dungeon-fs', battle);
@@ -10810,72 +10806,7 @@ function showDungeonPanels(){
     const map = CONFIG.maps.find(m=>m.id===selectedMapId);
     title.textContent = map ? map.name : '';
   }
-  // Vào màn chạm trán Vượt Ải trên mobile (đang ở chiều dọc) thì tự động xoay ngang màn hình luôn — giống PK.
-  // Thất bại thì bỏ qua âm thầm vì đây là hành động tự động, không phải người dùng chủ động bấm.
-  if(battle && !wasBattle){
-    try{
-      const isPortraitNow = !screen.orientation || /portrait/.test(screen.orientation.type||'');
-      const isMobileLike = ('ontouchstart' in window) || (navigator.maxTouchPoints||0) > 0;
-      if(isMobileLike && isPortraitNow) dungeonAttemptLandscapeLock(false);
-    }catch(e){}
-  } else if(!battle && wasBattle){
-    dungeonExitLandscape();
-  }
 }
-// Bỏ khoá xoay ngang + thoát toàn màn hình khi rời màn chạm trán Vượt Ải (bấm "Bản đồ", đóng tab, thua/thắng xong...).
-function dungeonExitLandscape(){
-  try{
-    if(screen.orientation && typeof screen.orientation.unlock === 'function') screen.orientation.unlock();
-  }catch(e){}
-  try{
-    const isFs = document.fullscreenElement || document.webkitFullscreenElement;
-    if(isFs){
-      const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
-      if(exitFs) exitFs.call(document).catch(function(){});
-    }
-  }catch(e){}
-  try{ const rb = document.getElementById('dungeonRotateBtn'); if(rb) rb.classList.remove('active'); }catch(e){}
-}
-// Dùng chung cho cả tự động (khi vào chạm trán trên mobile) lẫn thủ công (nút "🔄 Xoay ngang" ở Vượt Ải):
-// yêu cầu toàn màn hình rồi khoá xoay sang ngang. showToastOnFail=true chỉ hiện thông báo lỗi khi người dùng CHỦ ĐỘNG bấm nút.
-function dungeonAttemptLandscapeLock(showToastOnFail){
-  const btn = document.getElementById('dungeonRotateBtn');
-  const doLock = function(){
-    try{
-      if(screen.orientation && typeof screen.orientation.lock === 'function'){
-        screen.orientation.lock('landscape').then(function(){
-          if(btn) btn.classList.add('active');
-        }).catch(function(){
-          if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
-        });
-      } else if(showToastOnFail){
-        toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
-      }
-    }catch(e){
-      if(showToastOnFail) toast('Trình duyệt không hỗ trợ tự xoay — vui lòng xoay ngang thiết bị theo cách thủ công.');
-    }
-  };
-  try{
-    const el = document.documentElement;
-    const reqFs = el.requestFullscreen || el.webkitRequestFullscreen;
-    if(!document.fullscreenElement && reqFs){
-      reqFs.call(el).then(doLock).catch(doLock);
-    } else {
-      doLock();
-    }
-  }catch(e){
-    doLock();
-  }
-}
-window.toggleDungeonLandscape = function(){
-  const alreadyLandscape = screen.orientation && /landscape/.test(screen.orientation.type||'');
-  if(alreadyLandscape){
-    // Đang ở chế độ ngang rồi -> bấm để quay lại dọc
-    dungeonExitLandscape();
-    return;
-  }
-  dungeonAttemptLandscapeLock(true);
-};
 function renderDungeonTab(){
   const sel = document.getElementById('dungeonMapSelect');
   if(sel){
@@ -11438,13 +11369,14 @@ function flyStrike(prefix, fromSide, toSide, emoji, durationMs, isUltimate){
         const vidH = vidW * (580/1280); // video Chiêu Nộ cắt theo tỉ lệ 1280×580 — khác chiêu thường (1280×440)
         const vidDur = dungeonRageDurationOverride || pkRageVidDurFor(dur);
         // cfg.targetX/targetY (0.38/0.58...) được canh riêng cho lưỡi liềm CSS nhỏ của chiêu thường — lệch tâm
-        // có chủ đích. Với hiệu ứng full-video "hạ ngay trên mục tiêu", phải nhắm đúng TÂM icon quái/đối thủ
-        // (0.5/0.5) thay vì tái dùng tỉ lệ lệch tâm đó — nếu không, trên màn hình dọc mobile (icon nhỏ) chiêu sẽ
-        // rơi lệch hẳn ra ngoài quái/boss/nhân vật thay vì đúng chính giữa.
+        // có chủ đích. Với hiệu ứng full-video "hạ ngay trên mục tiêu", phải nhắm đúng vào thân quái/đối thủ
+        // (không dùng lại tỉ lệ targetY=0.40 của chiêu thường — vốn quá cao, làm hiệu ứng trông như lơ lửng
+        // phía trên đầu mục tiêu thay vì đánh trúng thân) — áp dụng CHO CẢ Vạn Kiếm Quy Tông lẫn Nhất Kiếm
+        // Khai Thiên, không chỉ riêng NKKT như trước.
         const targetCenterX = isNKKTFx ? (toRect.left + toRect.width * 0.5) : toX;
-        const targetCenterY = isNKKTFx ? (toRect.top + toRect.height * 0.5) : toY;
+        const targetCenterY = toRect.top + toRect.height * 0.6;
         const effDx = isNKKTFx ? (targetCenterX - fromX) : dx;
-        const effDy = isNKKTFx ? (targetCenterY - fromY) : dy;
+        const effDy = targetCenterY - fromY;
 
         // Video nguồn ẩn — chỉ dùng để lấy khung hình vẽ lên canvas, không hiển thị trực tiếp.
         const srcVid = document.createElement('video');
@@ -12084,25 +12016,10 @@ function handleVictory(){
     ensureDungeonEncounterQuota();
     CHAR.dungeonEncounterUsedByMap[selectedMapId] = (CHAR.dungeonEncounterUsedByMap[selectedMapId]||0) + 1;
     if(!CHAR.mapDefeatedMonsters) CHAR.mapDefeatedMonsters = {};
-    const wasLocked = (()=>{
-      const ordered = orderedMaps();
-      const idx = ordered.findIndex(m=>m.id===selectedMapId);
-      const nextMap = ordered[idx+1];
-      return nextMap && !isMapUnlocked(nextMap.id);
-    })();
     if(mo.cfgId){
       if(!CHAR.mapDefeatedMonsters[selectedMapId]) CHAR.mapDefeatedMonsters[selectedMapId] = [];
       if(!CHAR.mapDefeatedMonsters[selectedMapId].includes(mo.cfgId)){
         CHAR.mapDefeatedMonsters[selectedMapId].push(mo.cfgId);
-      }
-    }
-    if(wasLocked){
-      const ordered = orderedMaps();
-      const idx = ordered.findIndex(m=>m.id===selectedMapId);
-      const nextMap = ordered[idx+1];
-      if(nextMap && isMapUnlocked(nextMap.id)){
-        toast(`🔓 Đã mở khoá bản đồ "${nextMap.name}"!`);
-        pushLog(`🔓 Mở khoá bản đồ mới: ${nextMap.name}`, '#2dd9b8');
       }
     }
   }
@@ -12204,7 +12121,6 @@ function renderEncounter(){
   if(!map){
     sec.style.display = 'none';
     card.style.display = 'none';
-    document.getElementById('battleLog').innerHTML = '';
     return;
   }
   sec.style.display = 'block';
@@ -12215,7 +12131,6 @@ function renderEncounter(){
     card.innerHTML = dungeonQuotaBlocked
       ? `<div class="empty-note">⏰ Bạn đã hết ${dungeonDailyCap(map.id)} lượt chạm trán ở "${map.name}" hôm nay. Chọn bản đồ khác hoặc quay lại vào ngày mai!</div>`
       : `<div class="empty-note">Bản đồ này chưa có quái nào được tạo.</div>`;
-    document.getElementById('battleLog').innerHTML = '';
     return;
   }
 
