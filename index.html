@@ -329,7 +329,50 @@ window.addEventListener('unhandledrejection', function(ev){
   }
   .char-hud{display:flex; flex-direction:column; gap:5px; min-width:230px;}
   .char-hud 
-  .hud-beast-thumb{
+  
+  
+  @keyframes eventIconShake {
+    0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
+    12% { transform: translate3d(-5px,0,0) rotate(-10deg); }
+    24% { transform: translate3d(5px,0,0) rotate(10deg); }
+    36% { transform: translate3d(-4px,0,0) rotate(-8deg); }
+    48% { transform: translate3d(4px,0,0) rotate(8deg); }
+    60% { transform: translate3d(-3px,0,0) rotate(-5deg); }
+    72% { transform: translate3d(3px,0,0) rotate(5deg); }
+    84% { transform: translate3d(-1px,0,0) rotate(-2deg); }
+  }
+  .event-icon-shake{
+    animation: eventIconShake .85s ease-in-out;
+  }
+  .event-icon-shake img.nav-icon-full{
+    filter: drop-shadow(0 0 6px rgba(244,185,62,.85));
+  }
+#eventMarqueeWrap{
+    position:fixed; left:0; right:0; top:38%;
+    z-index:8500; pointer-events:none;
+    overflow:hidden; height:34px;
+    display:none;
+    background:linear-gradient(90deg, transparent, rgba(8,10,18,.72) 12%, rgba(8,10,18,.72) 88%, transparent);
+  }
+  #eventMarqueeWrap.show{ display:block; }
+  body.feature-tab-open #eventMarqueeWrap,
+  body.pk-battle-open #eventMarqueeWrap,
+  body.dungeon-battle-open #eventMarqueeWrap,
+  body.title-battle-open #eventMarqueeWrap{
+    display:none !important;
+  }
+  #eventMarqueeTrack{
+    display:inline-block; white-space:nowrap;
+    font-size:13px; font-weight:800; letter-spacing:.04em;
+    color:#ffe08a; text-shadow:0 0 10px rgba(244,185,62,.55), 0 1px 2px #000;
+    line-height:34px; padding-left:100%;
+    animation: eventMarqueeRun 22s linear infinite;
+  }
+  @keyframes eventMarqueeRun{
+    0% { transform:translateX(0); }
+    100% { transform:translateX(-100%); }
+  }
+.hud-beast-thumb{
     position:relative; width:28px; height:28px; border-radius:7px; overflow:hidden;
     border:1px solid rgba(79,209,255,.45); flex-shrink:0; background:#000;
   }
@@ -3755,6 +3798,18 @@ window.addEventListener('unhandledrejection', function(ev){
         <h3><span class="n">34</span>🐉 Thần Thú (Thiên Lân)<button class="admin-collapse-btn" id="apcbtn_34" onclick="toggleAdminPanel('34')">+</button></h3><div class="admin-panel-body collapsed" id="apcbody_34">
         <div style="font-size:10.5px; color:var(--text-dim); line-height:1.6;">Người chơi mua <b>Mảnh Thần Thú Thiên Lân</b> ngay tại <b>🛒 Shop Bang Hội</b> (mục 20 bên dưới) như các vật phẩm khác — cấu hình giá/số lượng/kho ở đó. Gom đủ 50/50 mảnh rồi vào mục <b>🐉 Thần Thú</b> trong tab Bang Hội để ghép thành 1 Thần Thú Thiên Lân, cộng vĩnh viễn +8% Máu, +6% Công, +6% Thủ cho nhân vật.</div>
         </div></div>
+      <div class="admin-panel">
+        <h3><span class="n">35</span>🤖 Bot Tụ Linh<button class="admin-collapse-btn" id="apcbtn_35" onclick="toggleAdminPanel('35')">+</button></h3><div class="admin-panel-body collapsed" id="apcbody_35">
+        <div style="font-size:10.5px; color:var(--text-dim); line-height:1.55; margin-bottom:10px;">Mỗi lần bấm, <b>mỗi bot triệu hồi Tụ Linh đúng 1 lần</b> (trừ 10.000 vàng, +100 điểm, nhận 1 phần thưởng vòng quay). Bot <b>không đủ vàng thì bỏ qua, không triệu hồi</b>. Cần đang có sự kiện Tụ Linh.</div>
+        <div class="refine-info" style="margin-bottom:10px;">
+          <div class="refine-row"><span>Bot quét được</span><b id="btl_botCount">—</b></div>
+          <div class="refine-row"><span>Đủ vàng (≥ 10.000)</span><b id="btl_canCount" style="color:var(--malachite);">—</b></div>
+          <div class="refine-row"><span>Thiếu vàng</span><b id="btl_poorCount" style="color:var(--danger);">—</b></div>
+        </div>
+        <button class="btn btn-ghost" type="button" style="width:100%;margin-bottom:8px;" onclick="adminPreviewBotTuLinh()">🔄 Quét bot</button>
+        <button class="admin-add-btn" type="button" id="btl_spinOnce" onclick="adminBotTuLinhOnce()">🌀 Bot triệu hồi Tụ Linh (1 nhấp = 1 lần / bot)</button>
+        <div class="auth-msg" id="btl_msg" style="margin-top:8px;"></div>
+        </div></div>
       <!-- boss config -->
       <div class="admin-panel">
         <h3><span class="n">7</span>Tạo Boss (Săn Boss)<button class="admin-collapse-btn" id="apcbtn_7" onclick="toggleAdminPanel('7')">+</button></h3><div class="admin-panel-body collapsed" id="apcbody_7">
@@ -5396,6 +5451,122 @@ function onlineLabelHtml(on){
   return `<span style="font-size:10px;font-weight:700;color:${on?'#3dde7b':'#8b8fa3'};margin-left:4px;">${on?'Online':'Offline'}</span>`;
 }
 let presenceTimer = null;
+
+function formatEventRemain(ms){
+  ms = Math.max(0, ms||0);
+  const total = Math.floor(ms/1000);
+  const d = Math.floor(total/86400);
+  const h = Math.floor((total%86400)/3600);
+  const m = Math.floor((total%3600)/60);
+  const s = total%60;
+  if(d>0) return d+' ngày '+h+' giờ';
+  if(h>0) return h+' giờ '+String(m).padStart(2,'0')+' phút';
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function ensureEventMarqueeEl(){
+  let wrap = document.getElementById('eventMarqueeWrap');
+  if(wrap) return wrap;
+  wrap = document.createElement('div');
+  wrap.id = 'eventMarqueeWrap';
+  wrap.innerHTML = '<div id="eventMarqueeTrack"></div>';
+  document.body.appendChild(wrap);
+  return wrap;
+}
+function isMainGameHomeVisible(){
+  const gameOn = document.getElementById('screen-game')?.classList.contains('active');
+  if(!gameOn) return false;
+  if(document.body.classList.contains('feature-tab-open')) return false;
+  if(document.body.classList.contains('pk-battle-open')) return false;
+  if(document.body.classList.contains('dungeon-battle-open')) return false;
+  if(document.querySelector('.tab-overlay.active:not(.item-modal-overlay)')) return false;
+  return true;
+}
+function setEventMarqueeText(parts){
+  const wrap = ensureEventMarqueeEl();
+  const track = document.getElementById('eventMarqueeTrack');
+  if(!parts.length || !isMainGameHomeVisible()){
+    wrap.classList.remove('show');
+    return;
+  }
+  const line = parts.join('     •     ');
+  const doubled = line + '     •     ' + line + '     •     ';
+  if(track.dataset.raw !== line){
+    track.dataset.raw = line;
+    track.textContent = doubled;
+  }
+  wrap.classList.add('show');
+}
+async function collectLiveEventMessages(){
+  const parts = [];
+  window.__liveEventFlags = { worldBoss:false, tuLinh:false };
+  try{
+    const ev = await S.get('worldboss:event');
+    if(ev && ev.active && ev.endTime > Date.now()){
+      window.__liveEventFlags.worldBoss = true;
+      let extra = '';
+      try{
+        if(typeof fetchWorldBossDamageList==='function' && typeof computeWbCurHp==='function'){
+          const rows = await fetchWorldBossDamageList(ev.eventId);
+          const totalDamage = (rows||[]).reduce((s,r)=>s+(r.damage||0),0);
+          const totalHealed = (typeof fetchWorldBossHealTotal==='function') ? (await fetchWorldBossHealTotal(ev.eventId)) : 0;
+          const hp = computeWbCurHp(ev.maxHp, totalDamage, totalHealed);
+          if(hp<=0) extra = '';
+          else extra = ` — còn ${formatEventRemain(ev.endTime-Date.now())}`;
+          if(hp>0) parts.push(`🌍 Sự kiện Boss Thế Giới «${ev.name||'Boss'}» đang diễn ra${extra}`);
+        } else {
+          parts.push(`🌍 Sự kiện Boss Thế Giới «${ev.name||'Boss'}» đang diễn ra — còn ${formatEventRemain(ev.endTime-Date.now())}`);
+        }
+      }catch(e){
+        parts.push(`🌍 Sự kiện Boss Thế Giới «${ev.name||'Boss'}» đang diễn ra — còn ${formatEventRemain(ev.endTime-Date.now())}`);
+      }
+    }
+  }catch(e){}
+  try{
+    const cycle = await S.get('tulinh:cycle');
+    if(cycle && cycle.endAt > Date.now()){
+      window.__liveEventFlags.tuLinh = true;
+      parts.push(`🔮 Sự kiện Tụ Linh đang diễn ra — còn ${formatEventRemain(cycle.endAt-Date.now())}`);
+    }
+  }catch(e){}
+  return parts;
+}
+let eventMarqueeTimer = null;
+async function refreshEventMarquee(){
+  try{
+    const parts = await collectLiveEventMessages();
+    setEventMarqueeText(parts);
+  }catch(e){}
+}
+window.__liveEventFlags = { worldBoss:false, tuLinh:false };
+let eventIconShakeTimer = null;
+function shakeEventTabIcon(btnId){
+  const el = document.getElementById(btnId);
+  if(!el) return;
+  el.classList.remove('event-icon-shake');
+  void el.offsetWidth;
+  el.classList.add('event-icon-shake');
+  setTimeout(()=>{ try{ el.classList.remove('event-icon-shake'); }catch(e){} }, 900);
+}
+function pulseLiveEventIcons(){
+  const gameOn = document.getElementById('screen-game')?.classList.contains('active');
+  if(!gameOn) return;
+  const f = window.__liveEventFlags || {};
+  if(f.worldBoss) shakeEventTabIcon('openWorldBossTab');
+  if(f.tuLinh) setTimeout(()=> shakeEventTabIcon('openTuLinhTab'), f.worldBoss ? 180 : 0);
+}
+function startEventIconShakeLoop(){
+  if(eventIconShakeTimer) clearInterval(eventIconShakeTimer);
+  pulseLiveEventIcons();
+  eventIconShakeTimer = setInterval(pulseLiveEventIcons, 10000);
+}
+function startEventMarqueeLoop(){
+  ensureEventMarqueeEl();
+  refreshEventMarquee();
+  startEventIconShakeLoop();
+  if(eventMarqueeTimer) clearInterval(eventMarqueeTimer);
+  eventMarqueeTimer = setInterval(refreshEventMarquee, 12000);
+}
+
 function startPresenceHeartbeat(){
   markCharActive();
   if(presenceTimer) clearInterval(presenceTimer);
@@ -5458,6 +5629,7 @@ async function enterGame(){
   }
   showScreen('screen-game');
   startPresenceHeartbeat();
+  startEventMarqueeLoop();
   refreshHud();
   // Đã bỏ khối pha lê 3D xoay ở giữa màn hình chính theo yêu cầu — không còn khởi tạo cảnh 3D nữa.
   autoMineOn = false;
@@ -6764,6 +6936,13 @@ function isFeatureTab(id){
 function syncFeatureTabBodyClass(){
   const any = document.querySelector('.tab-overlay.active:not(.item-modal-overlay)');
   document.body.classList.toggle('feature-tab-open', !!any);
+  try{
+    const wrap = document.getElementById('eventMarqueeWrap');
+    if(wrap){
+      if(any || !isMainGameHomeVisible()) wrap.classList.remove('show');
+      else if(typeof refreshEventMarquee==='function') refreshEventMarquee();
+    }
+  }catch(e){}
 }
 function getActiveTabCard(){
   const ov = document.querySelector('.tab-overlay.active:not(.item-modal-overlay)');
@@ -12229,6 +12408,76 @@ async function ensureTuLinhCycle(){
   }
   return cycle;
 }
+
+window.adminPreviewBotTuLinh = async function(){
+  const msg = document.getElementById('btl_msg');
+  try{
+    const keys = await listBotKeys();
+    let can = 0, poor = 0, empty = 0;
+    for(const key of keys){
+      const acc = await S.get(key);
+      if(!acc || !acc.character){ empty++; continue; }
+      if((acc.character.gold||0) >= TULINH_SPIN_COST) can++;
+      else poor++;
+    }
+    const elN = document.getElementById('btl_botCount');
+    const elC = document.getElementById('btl_canCount');
+    const elP = document.getElementById('btl_poorCount');
+    if(elN) elN.textContent = String(keys.length);
+    if(elC) elC.textContent = String(can);
+    if(elP) elP.textContent = String(poor);
+    if(msg){ msg.textContent = empty ? (`Quét xong. ${empty} bot chưa có nhân vật.`) : 'Quét xong.'; msg.className = 'auth-msg ok'; }
+  }catch(e){
+    if(msg){ msg.textContent = 'Lỗi quét bot: '+(e.message||e); msg.className = 'auth-msg err'; }
+  }
+};
+window.adminBotTuLinhOnce = async function(){
+  const msg = document.getElementById('btl_msg');
+  const btn = document.getElementById('btl_spinOnce');
+  if(btn){ btn.disabled = true; btn.textContent = '🌀 Đang triệu hồi...'; }
+  try{
+    const cycle = await S.get('tulinh:cycle');
+    if(!cycle || Number(cycle.endAt||0) <= Date.now()){
+      if(msg){ msg.textContent = 'Chưa có sự kiện Tụ Linh đang diễn ra — hãy mở chu kỳ ở mục 32 trước.'; msg.className = 'auth-msg err'; }
+      return;
+    }
+    if(!CONFIG.tuLinhWheel || !CONFIG.tuLinhWheel.length){
+      if(msg){ msg.textContent = 'Chưa cấu hình vật phẩm vòng quay Tụ Linh.'; msg.className = 'auth-msg err'; }
+      return;
+    }
+    const keys = await listBotKeys();
+    let ok = 0, skipGold = 0, skipNoChar = 0;
+    for(const key of keys){
+      const acc = await S.get(key);
+      if(!acc || !acc.character){ skipNoChar++; continue; }
+      const ch = acc.character;
+      if((ch.gold||0) < TULINH_SPIN_COST){ skipGold++; continue; }
+      ch.gold = (ch.gold||0) - TULINH_SPIN_COST;
+      if(!ch.materials) ch.materials = {};
+      const reward = pickTuLinhReward();
+      if(reward && reward.matName){
+        ch.materials[reward.matName] = (ch.materials[reward.matName]||0) + Number(reward.qty||1);
+      }
+      acc.character = ch;
+      await S.set(key, acc);
+      const username = String(key).replace(/^account:/,'');
+      const ptsKey = 'tulinh:score:'+cycle.startAt+':'+username;
+      const cur = Number(await S.get(ptsKey)) || 0;
+      await S.set(ptsKey, cur + TULINH_SPIN_POINTS);
+      ok++;
+    }
+    if(msg){
+      msg.textContent = `Xong 1 lượt: ${ok} bot triệu hồi. Bỏ qua thiếu vàng: ${skipGold}. Không có nhân vật: ${skipNoChar}.`;
+      msg.className = 'auth-msg ok';
+    }
+    toast(`🤖 Bot Tụ Linh: ${ok} triệu hồi, ${skipGold} thiếu vàng`);
+    try{ adminPreviewBotTuLinh(); }catch(e){}
+  }catch(e){
+    if(msg){ msg.textContent = 'Lỗi: '+(e.message||e); msg.className = 'auth-msg err'; }
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = '🌀 Bot triệu hồi Tụ Linh (1 nhấp = 1 lần / bot)'; }
+  }
+};
 window.adminStartTuLinhCycle = async function(){
   const now = Date.now();
   const cycle = { startAt: now, endAt: now + TULINH_CYCLE_MS };
@@ -12236,6 +12485,7 @@ window.adminStartTuLinhCycle = async function(){
   const msg = document.getElementById('tl_cycleMsg');
   if(msg){ msg.textContent = 'Đã mở chu kỳ Tụ Linh mới — đếm ngược 72 giờ bắt đầu.'; msg.className = 'auth-msg ok'; }
   toast('🔮 Đã mở chu kỳ Tụ Linh mới (72 giờ)');
+  try{ refreshEventMarquee(); }catch(e){}
 };
 window.adminEndTuLinhCycle = async function(){
   const msg = document.getElementById('tl_cycleMsg');
@@ -12248,6 +12498,7 @@ window.adminEndTuLinhCycle = async function(){
   await S.set('tulinh:cycle', cycle);
   if(msg){ msg.textContent = 'Đã kết thúc sự kiện Tụ Linh — Top 20 sẽ nhận thưởng ngay khi vào lại màn Tụ Linh.'; msg.className = 'auth-msg ok'; }
   toast('🔮 Đã kết thúc sự kiện Tụ Linh');
+  try{ refreshEventMarquee(); }catch(e){}
 };
 /* ================= THẦN THÚ THIÊN LÂN — mua mảnh ở Shop Bang Hội + ghép ================= */
 const BEAST_FRAGMENT_NAME = 'Mảnh Thần Thú Thiên Lân';
@@ -19087,6 +19338,7 @@ document.getElementById('wb_start').addEventListener('click', async ()=>{
   msg.textContent = `Đã bắt đầu sự kiện "${event.name}" — kéo dài ${CONFIG.worldBoss.durationMin} phút.`;
   msg.className = 'auth-msg ok';
   toast('Đã bắt đầu sự kiện Boss Thế Giới!');
+  try{ refreshEventMarquee(); }catch(e){}
   renderWbStatus();
 });
 document.getElementById('wb_stop').addEventListener('click', async ()=>{
@@ -19099,6 +19351,7 @@ document.getElementById('wb_stop').addEventListener('click', async ()=>{
   msg.textContent = 'Đã kết thúc sự kiện.';
   msg.className = 'auth-msg ok';
   toast('Đã kết thúc sự kiện Boss Thế Giới');
+  try{ refreshEventMarquee(); }catch(e){}
   renderWbStatus();
 });
 async function renderWbStatus(){
