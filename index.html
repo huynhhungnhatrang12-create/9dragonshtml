@@ -673,6 +673,19 @@ window.addEventListener('unhandledrejection', function(ev){
     background:linear-gradient(180deg,var(--bg-panel-2) 82%, rgba(29,32,41,0));
     box-shadow:0 6px 10px -6px rgba(0,0,0,.5);
   }
+  /* Tay cầm "kéo xuống để đóng" — vừa bấm được như 1 nút, vừa hỗ trợ kéo bằng ngón tay xuống dưới ngưỡng thì tự đóng tab. */
+  .tab-drag-handle{
+    position:sticky; top:0; z-index:7; margin:0 -12px; padding:9px 0 6px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    background:linear-gradient(180deg,var(--bg-panel-2) 70%, rgba(29,32,41,0));
+    touch-action:none;
+  }
+  .tab-drag-handle .tab-drag-bar{
+    width:42px; height:4px; border-radius:3px; background:rgba(255,255,255,.28);
+    transition:background .15s ease;
+  }
+  .tab-drag-handle:active .tab-drag-bar{ background:rgba(45,217,184,.65); }
+  .tab-card.tab-drag-active{ transition:none !important; }
   #tabScrollFab{
     position:fixed; right:max(8px, env(safe-area-inset-right));
     bottom:max(16px, env(safe-area-inset-bottom));
@@ -1135,6 +1148,13 @@ window.addEventListener('unhandledrejection', function(ev){
     background:var(--bg-panel-2); border:1.5px solid var(--gold); color:var(--gold);
     font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:800;
     display:flex; align-items:center; justify-content:center; line-height:1; z-index:10;
+  }
+  /* Huy hiệu số lượng cho ô nguyên liệu — gộp chung kiểu ô vuông với trang bị để rút gọn không gian,
+     thay vì mỗi nguyên liệu chiếm nguyên 1 hàng dài như trước. Hiển thị tối đa "x99999". */
+  .slot-box .mat-qty-badge{
+    position:absolute; bottom:2px; left:0; right:0; text-align:center;
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:800; color:#fff;
+    background:rgba(0,0,0,.6); line-height:1.5; z-index:10; pointer-events:none;
   }
 
   /* +20 trở lên: huy hiệu số tự phát sáng hào quang kiểu 3D */
@@ -2777,6 +2797,7 @@ window.addEventListener('unhandledrejection', function(ev){
 
 <div class="tab-overlay" id="charTab">
   <div class="tab-card">
+    <div class="tab-drag-handle" data-drag-close="charTab" title="Kéo xuống hoặc bấm để đóng"><span class="tab-drag-bar"></span></div>
     <div class="tab-head"><h2 class="tab-title-h2"><img class="tab-title-icon" src="data:image/jpeg;base64,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" alt=""><span class="tab-title-text" data-i18n="tab_inventory">Kho đồ</span></h2><button class="close-x" data-close="charTab">✕</button></div>
 
     <div class="collapse-section" id="section_sell">
@@ -2796,7 +2817,7 @@ window.addEventListener('unhandledrejection', function(ev){
 
     <div class="collapse-section" id="section_inventory">
       <button class="collapse-header" onclick="toggleCollapse('inventory')">
-        <span>🎒 Trang bị trong kho <span id="invCountLabel" style="color:var(--text-dim); font-weight:400; font-size:11px;"></span></span>
+        <span>🎒 Trang bị &amp; Nguyên liệu trong kho <span id="invCountLabel" style="color:var(--text-dim); font-weight:400; font-size:11px;"></span></span>
         <span class="collapse-arrow" id="arrow_inventory">▸</span>
       </button>
       <div class="collapse-body" id="body_inventory">
@@ -2808,8 +2829,6 @@ window.addEventListener('unhandledrejection', function(ev){
           <button class="info-btn" onclick="openRarityInfoModal()" title="Ghi chú chỉ số theo bậc">ℹ️</button>
         </div>
         <div class="slot-compact-grid" id="invGrid"></div>
-        <div class="sec-label" style="margin-top:16px;">⛏️ Nguyên liệu</div>
-        <div class="mat-grid" id="matGrid"></div>
         <div id="tuyetAmDaoCraftBox" style="margin-top:16px;"></div>
       </div>
     </div>
@@ -6448,7 +6467,14 @@ window.openMaterialInfoModal = function(name){
   const info = MATERIAL_INFO[name];
   const have = CHAR ? (name==='Vàng' ? (CHAR.materials && CHAR.materials['Vàng']!=null ? CHAR.materials['Vàng'] : (CHAR.gold||0)) : name==='Dcom' ? (CHAR.dcom||0) : (CHAR.materials[name]||0)) : 0;
   const shopEntry = CONFIG.shopItems.find(s=>s.matName===name);
-  const sellLine = (shopEntry && shopEntry.sellPrice>0) ? `<div style="font-size:11px; color:var(--gold); margin-top:6px;">💰 Có thể bán lại: ${shopEntry.sellPrice} vàng/cái</div>` : '';
+  // Ô nguyên liệu ngoài Kho đồ giờ chỉ hiện icon + số lượng để gọn không gian — khối bán chuyển hẳn vào đây
+  // (bấm vào ô mở modal này ra để bán), dùng lại đúng 2 hàm updateMatSellPreview/sellMaterial như trước.
+  const sellLine = (shopEntry && shopEntry.sellPrice>0) ? `
+    <div style="font-size:11px; color:var(--gold); margin:6px 0 10px;">💰 Bán lại: ${shopEntry.sellPrice} vàng/cái</div>
+    <div class="mat-sell-row" style="margin-bottom:4px;">
+      <input type="number" class="mat-sell-input" id="matSellQty_${escapeAttr(name)}" value="1" min="1" max="${have}" oninput="updateMatSellPreview('${escapeAttr(name)}')">
+      <button class="mat-sell-btn" id="matSellBtn_${escapeAttr(name)}" onclick="sellMaterial('${escapeAttr(name)}')"></button>
+    </div>` : '';
   const isRealCurrency = (name==='Vàng' || name==='Dcom');
   const useGoldBtn = (name==='Vàng' && CHAR && (CHAR.materials['Vàng']||0)>0)
     ? `<button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="useMaterialAsGold()">🪙 Sử dụng (quy đổi ${(CHAR.materials['Vàng']||0).toLocaleString('vi-VN')} thành vàng)</button>`
@@ -6479,6 +6505,7 @@ window.openMaterialInfoModal = function(name){
       <div class="empty-note" style="padding:10px 0;">Nguyên liệu tuỳ chỉnh do quản trị viên tạo, chưa có ghi chú mô tả.</div>${sellLine}${useGoldBtn}${deleteBtn}`;
   }
   document.getElementById('materialInfoModal').classList.add('active');
+  if(shopEntry && shopEntry.sellPrice>0) updateMatSellPreview(name);
 };
 window.useMaterialAsGold = function(){
   if(!CHAR) return;
@@ -7063,6 +7090,46 @@ window.toggleAdminPanel = function(n){
   }
 };
 document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', ()=> closeTab(b.dataset.close)));
+// Tay cầm "kéo xuống để đóng" (vd Kho đồ): bấm phát là đóng ngay; kéo xuống quá ngưỡng cũng tự đóng,
+// kéo chưa đủ ngưỡng thì thả ra tự trượt về vị trí cũ — không ảnh hưởng cuộn nội dung bình thường của tab.
+(function setupTabDragHandles(){
+  const CLOSE_THRESHOLD = 90; // px — kéo xuống quá ngưỡng này thì coi như xác nhận đóng
+  document.querySelectorAll('.tab-drag-handle[data-drag-close]').forEach(handle=>{
+    const tabId = handle.dataset.dragClose;
+    const card = handle.closest('.tab-card');
+    if(!card) return;
+    let startY = 0, dragging = false, moved = false;
+    handle.addEventListener('touchstart', function(e){
+      if(!e.touches || e.touches.length !== 1) return;
+      startY = e.touches[0].clientY;
+      dragging = true; moved = false;
+      card.classList.add('tab-drag-active');
+    }, {passive:true});
+    handle.addEventListener('touchmove', function(e){
+      if(!dragging || !e.touches || e.touches.length !== 1) return;
+      const dy = Math.max(0, e.touches[0].clientY - startY); // chỉ cho kéo xuống, không kéo ngược lên
+      if(dy > 4) moved = true;
+      card.style.transform = 'translateY(' + dy + 'px)';
+      try{ e.preventDefault(); }catch(_){}
+    }, {passive:false});
+    function endDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      card.classList.remove('tab-drag-active');
+      const lastY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : startY;
+      const dy = Math.max(0, lastY - startY);
+      card.style.transform = '';
+      if(dy > CLOSE_THRESHOLD){ closeTab(tabId); }
+    }
+    handle.addEventListener('touchend', endDrag, {passive:true});
+    handle.addEventListener('touchcancel', endDrag, {passive:true});
+    // Bấm thẳng vào tay cầm (không kéo) cũng đóng tab ngay, như 1 cái nút bình thường.
+    handle.addEventListener('click', function(){
+      if(moved) return; // vừa mới kéo xong thì bỏ qua click "ma" trình duyệt tự sinh sau touchend
+      closeTab(tabId);
+    });
+  });
+})();
 document.querySelectorAll('.tab-overlay:not(.item-modal-overlay) .close-x').forEach(b=>{
   b.classList.add('back-main-btn');
   b.textContent = '← Trở lại';
@@ -13510,41 +13577,53 @@ function renderInventorySlots(){
   if(readyBtn) readyBtn.classList.toggle('on', invReadyOnly);
 
   const source = invReadyOnly ? (CHAR.inventory||[]).filter(canEquipByLevel) : (CHAR.inventory||[]);
-  let html = '';
-  const slots = invReadyOnly ? Math.max(source.length, 1) : MAX_INVENTORY;
-  for(let idx=0; idx<slots; idx++){
+  // Gộp chung nguyên liệu vào NGAY SAU các ô trang bị thật (nằm kề, không cách bởi các ô trống điền chỗ) —
+  // chỉ hiện nguyên liệu ở chế độ "Tất cả" (bộ lọc "Đủ cấp mặc" chỉ nói về trang bị nên bỏ qua nguyên liệu).
+  const matEntries = (!invReadyOnly) ? Object.entries(CHAR.materials||{}).filter(([,q])=>q>0) : [];
+  let itemsHtml = '';
+  for(let idx=0; idx<source.length; idx++){
     const it = source[idx];
-    if(it){
-      const equipped = isEquipped(it.id);
-      const selected = it.id === selectedInvId;
-      const ready = canEquipByLevel(it);
-      const legendary = (it.refineLv||0) >= 20;
-      const badgeCls = legendary ? 'refine-badge badge-legendary' : 'refine-badge';
-      const isPrem = it.rarity === 'do' || it.rarity === 'hongbac';
-      const doFx = it.rarity==='hongbac' ? ' gem-fx-hongbac-overlay' : (it.rarity==='do' ? ' gem-fx-do-overlay' : '');
-      const tintImg = (it.icon && it.rarity==='hongbac') ? ' filter:hue-rotate(185deg) saturate(1.4) brightness(1.06) contrast(1.08);' : '';
-      const iconBg = it.icon ? `background-image:url('${it.icon}'); background-size:cover; background-position:center;${tintImg}` : `background:${(RARITY_META[it.rarity]||RARITY_META.trang).color}14;`;
-      const glyph = it.icon ? '' : `<span class="default-icon-glyph" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; pointer-events:none;">${it.emoji||defaultStatIcon(it.slot||'weapon', it.rarity)}</span>`;
-      const doOverlay = isPrem ? '<div class="gem-fx-overlay-spin"></div><div class="gem-fx-overlay-sweep"></div>' : '';
-      const border = equipped ? (RARITY_META[it.rarity]||RARITY_META.trang).color : (ready ? 'var(--malachite)' : 'var(--line)');
-      const dim = (!ready && !invReadyOnly) ? 'opacity:.42; filter:grayscale(.25);' : '';
-      const sellPicked = sellSelectMode && sellSelectedIds.has(it.id);
-      const sellBorder = sellSelectMode ? (sellPicked ? 'var(--danger, #ff4d5e)' : border) : border;
-      const clickAction = sellSelectMode ? `toggleSellSelect('${it.id}')` : `openItemDetailModal('${it.id}')`;
-      html += `<div class="slot-box ${selected?'selected':''}${doFx}" style="border-color:${sellBorder}; ${sellSelectMode?'border-width:2px;':''} ${iconBg}${dim}${equipped&&sellSelectMode?' opacity:.4;':''}" onclick="${clickAction}">
-        ${glyph}
-        ${doOverlay}
-        ${equipped?'<span class="equipped-mark">✓</span>':''}
-        ${ready && !equipped && !sellSelectMode ? '<span class="equipped-mark" style="background:var(--malachite);">Lv</span>' : ''}
-        ${!ready && !sellSelectMode ? '<span class="nav-lock" style="display:flex; font-size:14px; background:rgba(0,0,0,.45);">🔒</span>' : ''}
-        ${it.refineLv ? `<span class="${badgeCls}">+${it.refineLv}</span>` : ''}
-        ${itemHammerReduced(it)>0 ? `<span class="hammer-reduce-badge">−${itemHammerReduced(it)}</span>` : ''}
-        ${sellPicked ? '<span class="equipped-mark" style="background:var(--danger, #ff4d5e); left:2px; right:auto;">💸</span>' : ''}
-      </div>`;
-    } else if(!invReadyOnly){
-      html += `<div class="slot-box empty-slot"></div>`;
-    }
+    const equipped = isEquipped(it.id);
+    const selected = it.id === selectedInvId;
+    const ready = canEquipByLevel(it);
+    const legendary = (it.refineLv||0) >= 20;
+    const badgeCls = legendary ? 'refine-badge badge-legendary' : 'refine-badge';
+    const isPrem = it.rarity === 'do' || it.rarity === 'hongbac';
+    const doFx = it.rarity==='hongbac' ? ' gem-fx-hongbac-overlay' : (it.rarity==='do' ? ' gem-fx-do-overlay' : '');
+    const tintImg = (it.icon && it.rarity==='hongbac') ? ' filter:hue-rotate(185deg) saturate(1.4) brightness(1.06) contrast(1.08);' : '';
+    const iconBg = it.icon ? `background-image:url('${it.icon}'); background-size:cover; background-position:center;${tintImg}` : `background:${(RARITY_META[it.rarity]||RARITY_META.trang).color}14;`;
+    const glyph = it.icon ? '' : `<span class="default-icon-glyph" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; pointer-events:none;">${it.emoji||defaultStatIcon(it.slot||'weapon', it.rarity)}</span>`;
+    const doOverlay = isPrem ? '<div class="gem-fx-overlay-spin"></div><div class="gem-fx-overlay-sweep"></div>' : '';
+    const border = equipped ? (RARITY_META[it.rarity]||RARITY_META.trang).color : (ready ? 'var(--malachite)' : 'var(--line)');
+    const dim = (!ready && !invReadyOnly) ? 'opacity:.42; filter:grayscale(.25);' : '';
+    const sellPicked = sellSelectMode && sellSelectedIds.has(it.id);
+    const sellBorder = sellSelectMode ? (sellPicked ? 'var(--danger, #ff4d5e)' : border) : border;
+    const clickAction = sellSelectMode ? `toggleSellSelect('${it.id}')` : `openItemDetailModal('${it.id}')`;
+    itemsHtml += `<div class="slot-box ${selected?'selected':''}${doFx}" style="border-color:${sellBorder}; ${sellSelectMode?'border-width:2px;':''} ${iconBg}${dim}${equipped&&sellSelectMode?' opacity:.4;':''}" onclick="${clickAction}">
+      ${glyph}
+      ${doOverlay}
+      ${equipped?'<span class="equipped-mark">✓</span>':''}
+      ${ready && !equipped && !sellSelectMode ? '<span class="equipped-mark" style="background:var(--malachite);">Lv</span>' : ''}
+      ${!ready && !sellSelectMode ? '<span class="nav-lock" style="display:flex; font-size:14px; background:rgba(0,0,0,.45);">🔒</span>' : ''}
+      ${it.refineLv ? `<span class="${badgeCls}">+${it.refineLv}</span>` : ''}
+      ${itemHammerReduced(it)>0 ? `<span class="hammer-reduce-badge">−${itemHammerReduced(it)}</span>` : ''}
+      ${sellPicked ? '<span class="equipped-mark" style="background:var(--danger, #ff4d5e); left:2px; right:auto;">💸</span>' : ''}
+    </div>`;
   }
+  const materialsHtml = matEntries.map(([name,qty])=>{
+    const displayQty = Math.min(qty, 99999);
+    const iconBg = `background-color:${(MATERIAL_INFO[name]&&MATERIAL_INFO[name].color)||'var(--gold)'}1c;`;
+    return `<div class="slot-box" style="${iconBg}" onclick="openMaterialInfoModal('${escapeAttr(name)}')">
+      <div style="position:absolute; inset:5px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center;">${materialIconHtml(name,40)}</div>
+      <span class="mat-qty-badge">x${displayQty.toLocaleString('vi-VN')}</span>
+    </div>`;
+  }).join('');
+  let placeholdersHtml = '';
+  if(!invReadyOnly){
+    const filled = source.length + matEntries.length;
+    for(let i=filled; i<MAX_INVENTORY; i++) placeholdersHtml += `<div class="slot-box empty-slot"></div>`;
+  }
+  let html = itemsHtml + materialsHtml + placeholdersHtml;
   if(invReadyOnly && !source.length){
     html = `<div class="empty-note" style="grid-column:1/-1;">Chưa có trang bị nào đủ cấp để mặc.</div>`;
   }
@@ -14070,30 +14149,9 @@ function syncItemDetailModal(){
   document.getElementById('itemDetailContent').innerHTML = itemDetailContentHtml(it);
 }
 function renderMaterials(){
-  const matGrid = document.getElementById('matGrid');
-  if(!matGrid || !CHAR) return;
-  const entries = Object.entries(CHAR.materials || {}).filter(([,qty])=> qty > 0);
-  if(!entries.length){
-    matGrid.innerHTML = `<div class="empty-note">Chưa có nguyên liệu nào. Đào khoáng sản để nhặt thêm.</div>`;
-    return;
-  }
-  matGrid.innerHTML = entries.map(([name,qty])=>{
-    const shopEntry = CONFIG.shopItems.find(s=>s.matName===name && s.sellPrice>0);
-    const sellPrice = shopEntry ? shopEntry.sellPrice : 0;
-    return `<div class="mat-item">
-      <div class="icon" style="cursor:pointer; overflow:hidden;" onclick="openMaterialInfoModal('${escapeAttr(name)}')">${materialIconHtml(name,34)}</div>
-      <div style="flex:1; cursor:pointer;" onclick="openMaterialInfoModal('${escapeAttr(name)}')">
-        <div class="mname">${name}</div>
-        <div class="mqty">Số lượng: ${qty}</div>
-      </div>
-      ${sellPrice>0 ? `
-        <div class="mat-sell-row" onclick="event.stopPropagation()">
-          <input type="number" class="mat-sell-input" id="matSellQty_${escapeAttr(name)}" value="1" min="1" max="${qty}" oninput="updateMatSellPreview('${escapeAttr(name)}')">
-          <button class="mat-sell-btn" id="matSellBtn_${escapeAttr(name)}" onclick="sellMaterial('${escapeAttr(name)}')"></button>
-        </div>` : ''}
-    </div>`;
-  }).join('');
-  entries.forEach(([name])=> updateMatSellPreview(name));
+  // Nguyên liệu giờ được vẽ chung ngay trong renderInventorySlots() (cùng lưới #invGrid, nằm kề trang bị) —
+  // hàm này giữ lại làm alias để mọi chỗ gọi renderMaterials() cũ vẫn tự cập nhật đúng.
+  renderInventorySlots();
 }
 function updateMatSellPreview(name){
   const shopEntry = CONFIG.shopItems.find(s=>s.matName===name && s.sellPrice>0);
@@ -14125,6 +14183,7 @@ window.sellMaterial = function(name){
   CHAR.gold += total;
   refreshHud(); persistChar();
   renderMaterials();
+  if(CHAR.materials[name] > 0) openMaterialInfoModal(name); else closeMaterialInfoModal();
   pushLog(`💰 Đã bán ${qty} ${materialIcon(name)} ${name} được +${total} vàng`, 'var(--gold)');
   toast(`Bán thành công +${total} vàng`);
 };
