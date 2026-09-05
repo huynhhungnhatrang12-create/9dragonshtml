@@ -2829,7 +2829,6 @@ window.addEventListener('unhandledrejection', function(ev){
           <button class="info-btn" onclick="openRarityInfoModal()" title="Ghi chú chỉ số theo bậc">ℹ️</button>
         </div>
         <div class="slot-compact-grid" id="invGrid"></div>
-        <div id="tuyetAmDaoCraftBox" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -2839,8 +2838,8 @@ window.addEventListener('unhandledrejection', function(ev){
         <span class="collapse-arrow" id="arrow_allgear">▸</span>
       </button>
       <div class="collapse-body" id="body_allgear">
-        <div class="sec-label" style="margin-top:0;">Xếp từ bậc thấp đến cao (Trắng → Xanh lam ngọc)</div>
-        <div id="allGearList"></div>
+        <div class="sec-label" style="margin-top:0;">Xếp từ bậc thấp đến cao (Trắng → Xanh lam ngọc) — lưới icon</div>
+        <div class="slot-compact-grid" id="allGearList" style="max-height:none;"></div>
       </div>
     </div>
   </div>
@@ -2921,7 +2920,7 @@ window.addEventListener('unhandledrejection', function(ev){
 <!-- chat thế giới -->
 <div class="tab-overlay" id="eventShopTab">
   <div class="tab-card" style="max-width:460px; max-height:88vh; overflow-y:auto;">
-    <div class="tab-head"><h2 id="eventShopTitleH2">🎉 Quà Nạp Sự Kiện</h2><button class="close-x" data-close="eventShopTab">✕</button></div>
+    <div class="tab-head"><h2 id="eventShopTitleH2">🎉 Quà Nạp Sự Kiện</h2><button class="info-btn" type="button" title="Ghi chú" onclick="openEventShopNote()" style="margin-left:6px;">ℹ️</button><button class="close-x" data-close="eventShopTab">✕</button></div>
     <div style="font-size:10.5px; color:var(--text-dim); margin-bottom:8px; line-height:1.5;">Chọn gói nạp, chuyển khoản theo thông tin hiển thị, gửi yêu cầu — quản trị viên xác nhận xong sẽ cộng Dcom + quà kèm + điểm VIP.</div>
     <div id="eventShopContent"></div>
   </div>
@@ -3612,6 +3611,8 @@ window.addEventListener('unhandledrejection', function(ev){
           <select id="es_kind">
             <option value="material">Nguyên liệu</option>
             <option value="equipment">Trang bị</option>
+            <option value="beastFrag">Mảnh Thần Thú Thiên Lân</option>
+            <option value="treasureFrag">Mảnh Báu Vật (Tuyết Ẩm Đao)</option>
           </select>
         </div>
         <div id="es_materialFields">
@@ -3658,7 +3659,8 @@ window.addEventListener('unhandledrejection', function(ev){
           </div>
           <div class="mini-field"><label>Cấp yêu cầu</label><input type="number" id="es_eqLevelReq" value="0" min="0"></div>
         </div>
-        <div class="mini-field"><label>Dcom nhận được (khi mua gói này — CỘNG THÊM, không trừ)</label><input type="number" id="es_price" value="100" min="1"></div>
+        <div class="mini-field"><label>Tiêu đề gói (hiện cho người chơi, thay cho +Dcom)</label><input id="es_packTitle" placeholder="vd: Gói Mảnh Thiên Lân x50" maxlength="80"></div>
+        <div class="mini-field"><label>Dcom nhận kèm (0 = không cộng Dcom)</label><input type="number" id="es_price" value="0" min="0"></div>
         <div class="field-row">
           <div class="mini-field"><label>Giới hạn mua (mỗi người, 0 = không giới hạn)</label><input type="number" id="es_limit" value="0" min="0"></div>
           <div class="mini-field"><label>Sự kiện kéo dài (giờ, 0 = không giới hạn)</label><input type="number" id="es_durationHours" value="0" min="0"></div>
@@ -3769,7 +3771,7 @@ window.addEventListener('unhandledrejection', function(ev){
       <!-- tu linh config -->
       <div class="admin-panel">
         <h3><span class="n">32</span>🔮 Tụ Linh (Vòng quay + Top 20)<button class="admin-collapse-btn" id="apcbtn_32" onclick="toggleAdminPanel('32')">+</button></h3><div class="admin-panel-body collapsed" id="apcbody_32">
-        <div style="font-size:10.5px; color:var(--text-dim); margin-bottom:10px; line-height:1.5;">Mỗi vòng quay tốn 10.000 vàng, người chơi nhận 1 vật phẩm ngẫu nhiên theo tỷ lệ bên dưới và +100 điểm lên bảng xếp hạng. Sau mỗi chu kỳ 72 giờ, người ở Top 20 nhận số lượng Mảnh Tuyết Ẩm Đao tương ứng hạng của mình. Đồng hồ đếm ngược CHỈ bắt đầu khi admin bấm mở chu kỳ bên dưới.</div>
+        <div style="font-size:10.5px; color:var(--text-dim); margin-bottom:10px; line-height:1.5;">Mỗi vòng quay tốn 10.000 vàng, người chơi nhận 1 vật phẩm ngẫu nhiên theo tỷ lệ bên dưới và +100 điểm lên bảng xếp hạng. Sau mỗi chu kỳ 72 giờ, người ở Top 20 nhận Mảnh Tuyết Ẩm Đao theo hạng, kèm vật phẩm thưởng thêm nếu admin ghi tên bên dưới. Đồng hồ đếm ngược CHỈ bắt đầu khi admin bấm mở chu kỳ bên dưới.</div>
         <button class="admin-add-btn" id="tl_startCycle" onclick="adminStartTuLinhCycle()">🟢 Mở sự kiện Tụ Linh (72 giờ)</button>
         <button class="btn btn-danger" id="tl_endCycle" onclick="adminEndTuLinhCycle()" style="width:100%; margin-top:8px;">🔴 Kết thúc sự kiện ngay</button>
         <div class="auth-msg" id="tl_cycleMsg" style="margin-bottom:12px; margin-top:8px;"></div>
@@ -3784,11 +3786,16 @@ window.addEventListener('unhandledrejection', function(ev){
         <button class="btn btn-ghost" type="button" id="tl_cancel" style="width:100%; margin-top:6px; display:none;">Huỷ sửa</button>
         <div id="tl_totalRate" style="font-size:11px; color:var(--text-dim); margin:6px 2px;"></div>
         <div id="tl_list" style="margin-top:6px;"></div>
-        <div class="sec-label" style="margin-top:16px;">🏆 Thưởng Top 20 (Mảnh Tuyết Ẩm Đao)</div>
+        <div class="sec-label" style="margin-top:16px;">🏆 Thưởng Top 20 (Mảnh Tuyết Ẩm Đao + thưởng thêm)</div>
         <div class="field-row">
           <div class="mini-field"><label>Hạng (1-20)</label><input type="number" id="tl_rank" value="1" min="1" max="20"></div>
-          <div class="mini-field"><label>Số lượng mảnh</label><input type="number" id="tl_rankQty" value="10" min="0"></div>
+          <div class="mini-field"><label>Số lượng mảnh Tuyết Ẩm Đao</label><input type="number" id="tl_rankQty" value="10" min="0"></div>
         </div>
+        <div class="field-row">
+          <div class="mini-field"><label>Thưởng thêm — tên vật phẩm</label><input id="tl_extraName" placeholder="vd: Mảnh Thần Thú Thiên Lân"></div>
+          <div class="mini-field"><label>Số lượng thưởng thêm</label><input type="number" id="tl_extraQty" value="1" min="1"></div>
+        </div>
+        <div style="font-size:10.5px;color:var(--text-dim);line-height:1.45;margin:-4px 2px 8px;">Để trống tên thì chỉ thưởng mảnh báu vật. Ghi tên rồi bấm lưu để cộng thêm vật phẩm đó vào hạng (có thể lưu nhiều lần để thêm nhiều món).</div>
         <button class="admin-add-btn" id="tl_rankAdd">+ Thêm / cập nhật hạng</button>
         <div id="tl_rankList" style="margin-top:6px;"></div>
         </div></div>
@@ -3819,14 +3826,18 @@ window.addEventListener('unhandledrejection', function(ev){
         </div></div>
       <div class="admin-panel">
         <h3><span class="n">35</span>🤖 Bot Tụ Linh<button class="admin-collapse-btn" id="apcbtn_35" onclick="toggleAdminPanel('35')">+</button></h3><div class="admin-panel-body collapsed" id="apcbody_35">
-        <div style="font-size:10.5px; color:var(--text-dim); line-height:1.55; margin-bottom:10px;">Mỗi lần bấm, <b>mỗi bot triệu hồi Tụ Linh đúng 1 lần</b> (trừ 10.000 vàng, +100 điểm, nhận 1 phần thưởng vòng quay). Bot <b>không đủ vàng thì bỏ qua, không triệu hồi</b>. Cần đang có sự kiện Tụ Linh.</div>
+        <div style="font-size:10.5px; color:var(--text-dim); line-height:1.55; margin-bottom:10px;">Chọn <b>số bot</b> và <b>số lần triệu hồi</b> mỗi bot. Mỗi lần trừ 10.000 vàng, +100 điểm, nhận 1 phần thưởng. Bot <b>thiếu vàng thì triệu hồi đến khi hết vàng rồi dừng</b> (không ép trừ âm). Cần đang có sự kiện Tụ Linh.</div>
+        <div class="field-row">
+          <div class="mini-field"><label>Số bot triệu hồi</label><input type="number" id="btl_botQty" value="10" min="1" max="200"></div>
+          <div class="mini-field"><label>Số lần / bot</label><input type="number" id="btl_spinQty" value="1" min="1" max="999"></div>
+        </div>
         <div class="refine-info" style="margin-bottom:10px;">
           <div class="refine-row"><span>Bot quét được</span><b id="btl_botCount">—</b></div>
           <div class="refine-row"><span>Đủ vàng (≥ 10.000)</span><b id="btl_canCount" style="color:var(--malachite);">—</b></div>
           <div class="refine-row"><span>Thiếu vàng</span><b id="btl_poorCount" style="color:var(--danger);">—</b></div>
         </div>
         <button class="btn btn-ghost" type="button" style="width:100%;margin-bottom:8px;" onclick="adminPreviewBotTuLinh()">🔄 Quét bot</button>
-        <button class="admin-add-btn" type="button" id="btl_spinOnce" onclick="adminBotTuLinhOnce()">🌀 Bot triệu hồi Tụ Linh (1 nhấp = 1 lần / bot)</button>
+        <button class="admin-add-btn" type="button" id="btl_spinOnce" onclick="adminBotTuLinhOnce()">🌀 Bot triệu hồi Tụ Linh</button>
         <div class="auth-msg" id="btl_msg" style="margin-top:8px;"></div>
         </div></div>
       <!-- boss config -->
@@ -4078,6 +4089,10 @@ window.addEventListener('unhandledrejection', function(ev){
           <div class="field-row">
             <div class="mini-field"><label>Máu (maxHp)</label><input type="number" id="gb_maxHp" value="3000000"></div>
             <div class="mini-field"><label>Công (atk)</label><input type="number" id="gb_atk" value="1200"></div>
+          </div>
+          <div class="field-row">
+            <div class="mini-field"><label>🛡️ Đỡ Đòn (số)</label><input type="number" id="gb_dodge" value="0" min="0" step="1"></div>
+            <div class="mini-field"><label>Phá (pierce)</label><input type="number" id="gb_pierce2" value="0" min="0" style="display:none;"></div>
           </div>
           <div class="field-row">
             <div class="mini-field"><label>Skill mỗi N đòn</label><input type="number" id="gb_skillEvery" value="4"></div>
@@ -6082,9 +6097,15 @@ const MATERIAL_INFO = {
   },
   'Mảnh Tuyết Ẩm Đao': {
     title: '🔮 Tụ Linh — Mảnh Tuyết Ẩm Đao',
-    desc: 'Mảnh báu vật <b>Tụ Linh</b> (tính năng đang cập nhật) — gom đủ <b>25/25</b> mảnh sẽ ghép được <b>Tuyết Ẩm Đao</b>, mang lên ô Báu vật sẽ tự động có sẵn <b>+25 Nộ</b> ngay khi vào trận (Vượt Ải, Săn Boss, Boss Thế Giới, Boss Bang Hội, PK).',
-    where: 'Ghép ở: trang Kho đồ → mục 🎒 Trang bị trong kho → khung "🗡️ Ghép Tuyết Ẩm Đao".',
+    desc: 'Mảnh báu vật <b>Tụ Linh</b> — gom đủ <b>25/25</b> mảnh rồi bấm xem chi tiết mảnh trên kho để <b>ghép Tuyết Ẩm Đao</b> (hoặc nâng sao nếu đã có). Mang lên ô Báu vật sẽ có <b>+25 Nộ</b> khi vào trận.',
+    where: 'Nguồn: sự kiện 🔮 Tụ Linh (vòng quay triệu hồi, thưởng Top 20). Dùng: Kho đồ → ô mảnh (khi có ≥1) hoặc chi tiết trang bị Tuyết Ẩm Đao → Nâng sao. Đủ 25/25 mới ghép/nâng.',
     color: '#8a5cf6',
+  },
+  'Mảnh Thần Thú Thiên Lân': {
+    title: '🐉 Mảnh Thần Thú Thiên Lân',
+    desc: 'Mảnh ghép và nâng sao <b>Thần Thú Thiên Lân</b>. Gom đủ <b>50 mảnh</b> để ghép 1 Thần Thú (cộng Máu/Công/Thủ). Sau khi ghép, dùng thêm mảnh để <b>nâng sao</b> (mỗi sao mở 1 ô kỹ năng và tăng % chỉ số thần thú).',
+    where: 'Nguồn: 🛒 Shop Bang Hội (mua bằng vàng/cống hiến như vật phẩm khác). Dùng: Bang Hội → mục 🐉 Thần Thú — Thiên Lân (ghép / nâng sao / Dùng-Gỡ).',
+    color: '#4fd1ff',
   },
 };
 
@@ -6492,7 +6513,7 @@ window.openMaterialInfoModal = function(name){
         </div>
       </div>
       <div style="font-size:12.5px; line-height:1.7; color:var(--text); margin-bottom:10px;">${info.desc}</div>
-      <div style="font-size:11px; color:var(--text-dim); line-height:1.6;">${info.where}</div>${sellLine}${useGoldBtn}${deleteBtn}`;
+      <div style="font-size:11px; color:var(--text-dim); line-height:1.6;">${info.where}</div>${sellLine}${tuyetAmDaoCraftBtnHtml(name)}${useGoldBtn}${deleteBtn}`;
   } else {
     box.innerHTML = `
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
@@ -6606,8 +6627,8 @@ function guildExpBonusPercent(ch){
 }
 // Lợi ích thụ động theo cấp VIP (1-18) — % cộng thêm EXP và Vàng kiếm được, admin cấu hình ở mục 27.
 function defaultVipBenefits(){
-  const arr = [{expPct:0, goldPct:0}]; // VIP0: không có lợi ích
-  for(let i=1;i<=18;i++) arr.push({ expPct: i*2, goldPct: i*2 }); // mặc định +2%/cấp, admin có thể chỉnh lại
+  const arr = [{expPct:0, goldPct:0, dungeonExtra:0}]; // VIP0: không mua thêm lượt ải
+  for(let i=1;i<=18;i++) arr.push({ expPct: i*2, goldPct: i*2, dungeonExtra: i*10 });
   return arr;
 }
 function vipBenefitsList(){
@@ -7650,6 +7671,27 @@ function getTreasureRageBonus(ch){
   });
   return Math.min(PK_RAGE_MAX, bonus);
 }
+
+function tuyetAmDaoCraftBtnHtml(name){
+  if(!CHAR || name !== TUYET_AM_DAO_MAT_NAME) return '';
+  const have = (CHAR.materials && CHAR.materials[TUYET_AM_DAO_MAT_NAME]) || 0;
+  const need = TUYET_AM_DAO_MAT_QTY;
+  const ready = have >= need;
+  const existing = (CHAR.inventory||[]).find(it=>it.rageBonus);
+  const cap = existing ? (RARITY_AWAKEN_CAP[existing.rarity] || 6) : 0;
+  const curStar = existing ? (existing.awakenStar||0) : 0;
+  const maxed = !!(existing && curStar >= cap);
+  let label, disabled;
+  if(existing){
+    label = maxed ? `Đã tối đa ${cap}★` : (ready ? `✨ Nâng sao (${have}/${need}) → ${curStar+1}★` : `Chưa đủ mảnh (${have}/${need})`);
+    disabled = maxed || !ready;
+  } else {
+    label = ready ? `✨ Ghép Tuyết Ẩm Đao (${have}/${need})` : `Chưa đủ mảnh để ghép (${have}/${need})`;
+    disabled = !ready;
+  }
+  return `<div style="margin-top:12px;font-size:11px;color:var(--text-dim);line-height:1.5;margin-bottom:8px;">${existing?`Đang có Tuyết Ẩm Đao ${curStar}★/${cap}★ — mỗi sao +${TUYET_AM_DAO_SPEED_PER_STAR} tốc độ.`:'Gom đủ mảnh rồi bấm ghép. Mang vào ô Báu vật để có +25 Nộ.'}</div>
+    <button class="btn ${disabled?'btn-ghost':'btn-primary'}" style="width:100%;${disabled?'opacity:.55;':''}" ${disabled?'disabled':''} onclick="craftTuyetAmDao(); closeMaterialInfoModal();">${label}</button>`;
+}
 function renderTuyetAmDaoCraftBox(){
   const box = document.getElementById('tuyetAmDaoCraftBox');
   if(!box || !CHAR) return;
@@ -7702,7 +7744,8 @@ window.craftTuyetAmDao = function(){
     existing.awakenStar = (existing.awakenStar||0) + 1;
     persistChar();
     renderCharTab();
-    renderTuyetAmDaoCraftBox();
+    try{ renderTuyetAmDaoCraftBox(); }catch(e){}
+    try{ if(typeof selectedInvId!=='undefined') selectedInvId = existing.id; syncItemDetailModal(); }catch(e){}
     toast(`Đã nâng Tuyết Ẩm Đao lên ${existing.awakenStar}★ — +${TUYET_AM_DAO_SPEED_PER_STAR} tốc độ!`);
     return;
   }
@@ -9600,11 +9643,11 @@ const GUILD_BOSS_SESSION_MS = 2 * 60 * 1000; // mỗi lượt vào trận kéo d
 let guildBossBattle = null;
 function defaultGuildBosses(){
   return [
-    { id:'thien_tai_thai_co', name:'Thiên Tai Thái Cổ', unlockGuildLevel:4, icon:'🌪️', maxHp:3000000, atk:1200, pierce:0, skillEvery:4, skillDmgMult:2.2, skillName:'Thiên Tai Giáng Thế' },
-    { id:'huyet_nguc_bao_quan', name:'Huyết Ngục Bảo Quân', unlockGuildLevel:6, icon:'🩸', maxHp:6000000, atk:2000, pierce:50, skillEvery:3, skillDmgMult:2.5, skillName:'Huyết Ngục Trảm' },
-    { id:'huyen_vu_tran_hai', name:'Huyền Vũ Trấn Hải', unlockGuildLevel:7, icon:'🐢', maxHp:10000000, atk:2800, pierce:80, skillEvery:3, skillDmgMult:2.8, skillName:'Trấn Hải Thần Uy' },
-    { id:'bang_phong_tinh_anh', name:'Băng Phong Tinh Anh', unlockGuildLevel:8, icon:'❄️', maxHp:16000000, atk:3600, pierce:120, skillEvery:3, skillDmgMult:3.0, skillName:'Băng Phong Quyết' },
-    { id:'u_minh_da_than', name:'U Minh Dạ Thần', unlockGuildLevel:9, icon:'🌑', maxHp:25000000, atk:5000, pierce:200, skillEvery:2, skillDmgMult:3.5, skillName:'U Minh Diệt Thế' },
+    { id:'thien_tai_thai_co', name:'Thiên Tai Thái Cổ', unlockGuildLevel:4, icon:'🌪️', maxHp:3000000, atk:1200, dodge:0, pierce:0, skillEvery:4, skillDmgMult:2.2, skillName:'Thiên Tai Giáng Thế' },
+    { id:'huyet_nguc_bao_quan', name:'Huyết Ngục Bảo Quân', unlockGuildLevel:6, icon:'🩸', maxHp:6000000, atk:2000, dodge:0, pierce:50, skillEvery:3, skillDmgMult:2.5, skillName:'Huyết Ngục Trảm' },
+    { id:'huyen_vu_tran_hai', name:'Huyền Vũ Trấn Hải', unlockGuildLevel:7, icon:'🐢', maxHp:10000000, atk:2800, dodge:0, pierce:80, skillEvery:3, skillDmgMult:2.8, skillName:'Trấn Hải Thần Uy' },
+    { id:'bang_phong_tinh_anh', name:'Băng Phong Tinh Anh', unlockGuildLevel:8, icon:'❄️', maxHp:16000000, atk:3600, dodge:0, pierce:120, skillEvery:3, skillDmgMult:3.0, skillName:'Băng Phong Quyết' },
+    { id:'u_minh_da_than', name:'U Minh Dạ Thần', unlockGuildLevel:9, icon:'🌑', maxHp:25000000, atk:5000, dodge:0, pierce:200, skillEvery:2, skillDmgMult:3.5, skillName:'U Minh Diệt Thế' },
   ];
 }
 // Shop Bang Hội giờ là danh sách VẬT PHẨM CỐ ĐỊNH do admin cấu hình sẵn (mục 20), luôn có bán bằng điểm boss —
@@ -9683,7 +9726,9 @@ function renderDcomVipTab(){
     <div class="refine-info" style="margin-bottom:14px;">
       <div class="refine-row"><span>EXP kiếm được</span><b style="color:var(--malachite);">+${vipExpBonusPercent(CHAR)}%</b></div>
       <div class="refine-row"><span>Vàng kiếm được</span><b style="color:var(--gold);">+${vipGoldBonusPercent(CHAR)}%</b></div>
-    </div>` : ''}
+      <div class="refine-row"><span>Mua thêm lượt Vượt Ải / ngày</span><b style="color:#7dd3fc;">${vipDungeonExtraCap(CHAR)} lượt</b></div>
+    </div>
+    <div style="font-size:10.5px;color:var(--text-dim);line-height:1.55;margin:-6px 0 14px;">VIP 1–18 mở hạn mức mua thêm lượt vượt ải (mặc định VIP n = n×10 lượt/ngày, thay cho mốc cứng 50). Hết lượt miễn phí thì vào bản đồ để mua.</div>` : `<div class="empty-note" style="margin-bottom:12px;">VIP 0 chưa mua thêm được lượt Vượt Ải — lên VIP 1 để mở.</div>`}
     ${(()=>{
       const levelGifts = (CONFIG.vipLevelGifts||[]).slice().sort((a,b)=>a.level-b.level);
       if(!levelGifts.length) return '';
@@ -9795,6 +9840,51 @@ window.claimVipLevelGift = function(id){
 // Quà Nạp Sự Kiện — bấm Nhận sẽ hiện thông tin chuyển khoản, gửi yêu cầu, ĐỢI ADMIN XÁC NHẬN mới cộng Dcom + quà kèm + điểm VIP
 const EVENT_SHOP_BANK_NAME = 'MB Bank';
 const EVENT_SHOP_BANK_ACCOUNT = '23456939999';
+
+function eventShopNoteHtml(){
+  const title = (typeof eventShopDisplayTitle==='function') ? eventShopDisplayTitle() : 'Quà Nạp Sự Kiện';
+  return `<div style="font-size:12.5px;line-height:1.7;">
+    <b>${title}</b> là các gói nạp sự kiện. Bấm <b>Nhận</b> rồi chuyển khoản theo nội dung hiện ra; admin duyệt thì bạn nhận quà (mảnh thần thú, mảnh báu vật, nguyên liệu, trang bị, Dcom nếu gói có kèm).<br>
+    Mỗi gói có tiêu đề riêng. Bấm <b>icon gói</b> để xem ghi chú chi tiết gói đó.
+  </div>`;
+}
+window.openEventShopNote = function(){
+  try{ document.getElementById('eventShopNoteOverlay')?.remove(); }catch(e){}
+  const ov = document.createElement('div');
+  ov.id = 'eventShopNoteOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10025;background:rgba(4,6,10,.72);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  ov.innerHTML = `<div style="width:100%;max-width:360px;background:linear-gradient(180deg,#141a2c,#0b0e16);border:1px solid rgba(244,185,62,.4);border-radius:16px;padding:18px;" onclick="event.stopPropagation();">
+      <div style="font-weight:800;color:var(--gold);margin-bottom:10px;">ℹ️ Ghi chú Quà Nạp Sự Kiện</div>
+      ${eventShopNoteHtml()}
+      <button class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="document.getElementById('eventShopNoteOverlay')?.remove();">Đóng</button>
+    </div>`;
+  document.body.appendChild(ov);
+};
+window.openEventShopPackNote = function(id){
+  const it = (CONFIG.eventShopItems||[]).find(x=>x.id===id);
+  if(!it){ toast('Gói không còn.'); return; }
+  try{ document.getElementById('eventShopNoteOverlay')?.remove(); }catch(e){}
+  const title = eventShopPackTitle(it);
+  const bonus = it.kind==='equipment'
+    ? `Trang bị ${it.name||''} [${(RARITY_META[it.rarity]||{}).label||it.rarity}]`
+    : `+${it.matQty||1} ${it.matName||''}`;
+  const ov = document.createElement('div');
+  ov.id = 'eventShopNoteOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10025;background:rgba(4,6,10,.72);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  ov.innerHTML = `<div style="width:100%;max-width:360px;background:linear-gradient(180deg,#141a2c,#0b0e16);border:1px solid rgba(244,185,62,.4);border-radius:16px;padding:18px;" onclick="event.stopPropagation();">
+      <div style="font-weight:800;color:var(--gold);margin-bottom:8px;">${title}</div>
+      <div style="font-size:12.5px;line-height:1.7;">
+        Quà kèm: <b>${bonus}</b>${(it.price||0)>0?`<br>Kèm Dcom: <b>+${Number(it.price).toLocaleString('vi-VN')}</b>`:''}<br>
+        Điểm VIP: <b>${(it.vipPoints!=null?it.vipPoints:it.price)||0}</b><br>
+        ${it.limit>0?('Giới hạn: <b>'+it.limit+' lần/người</b><br>'):'Không giới hạn số lần.<br>'}
+        Chuyển khoản rồi chờ admin duyệt để nhận quà.
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="document.getElementById('eventShopNoteOverlay')?.remove();">Đóng</button>
+    </div>`;
+  document.body.appendChild(ov);
+};
 function renderEventShopTab(){
   try{ applyEventShopTitleUI(); }catch(e){}
   const box = document.getElementById('eventShopContent');
@@ -9826,8 +9916,8 @@ function renderEventShopTab(){
     if(it.durationHours>0 && it.createdAt) metaBits.push(`Còn ${formatEventShopCountdown((it.createdAt + it.durationHours*3600000) - now)}`);
     metaBits.push(`+${vipPts.toLocaleString('vi-VN')} điểm VIP`);
     return `<div class="refine-row" style="align-items:center; gap:8px;">
-      <div class="icon" style="width:34px;height:34px;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-panel-2);flex-shrink:0;">${iconHtml}</div>
-      <span style="flex:1; min-width:0;"><b>+${(it.price||0).toLocaleString('vi-VN')} Dcom</b><br><span style="font-size:10px; color:var(--text-dim);">${desc}</span><br><span style="font-size:9.5px; color:var(--gold);">${metaBits.join(' · ')}</span></span>
+      <div class="icon" style="width:34px;height:34px;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-panel-2);flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation();openEventShopPackNote('${it.id}')">${iconHtml}</div>
+      <span style="flex:1; min-width:0;"><b>${eventShopPackTitle(it)}</b><br><span style="font-size:10px; color:var(--text-dim);">${desc}${(it.price||0)>0?` · kèm +${(it.price||0).toLocaleString('vi-VN')} Dcom`:''}</span><br><span style="font-size:9.5px; color:var(--gold);">${metaBits.join(' · ')}</span></span>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
         <button class="btn btn-primary" style="padding:5px 10px; font-size:11px; ${limitReached?'opacity:.5;':''}" ${limitReached?'disabled':''} onclick="openEventShopPayModal('${it.id}')">${limitReached?'Hết lượt':'Nhận'}</button>
       </div>
@@ -9853,8 +9943,8 @@ window.openEventShopPayModal = function(itemId){
   const box = document.getElementById('eventShopPayContent');
   box.innerHTML = `
     <div class="refine-info" style="margin-bottom:12px;">
-      <div class="refine-row"><span>Gói nhận</span><b style="color:var(--gold);">+${(it.price||0).toLocaleString('vi-VN')} Dcom</b></div>
-      <div class="refine-row"><span>Kèm quà</span><b>${bonusDesc}</b></div>
+      <div class="refine-row"><span>Gói nhận</span><b style="color:var(--gold);">${eventShopPackTitle(it)}</b></div>
+      <div class="refine-row"><span>Kèm quà</span><b>${bonusDesc}${(it.price||0)>0?(' · +'+(it.price||0).toLocaleString('vi-VN')+' Dcom'):''}</b></div>
     </div>
     <div class="sec-label" style="margin-top:0;">Thông tin chuyển khoản</div>
     <div class="refine-info" style="margin-bottom:12px;">
@@ -9885,7 +9975,7 @@ window.submitEventShopPayment = async function(){
   const id = now + '_' + Math.random().toString(36).slice(2,8);
   const payload = {
     id, username: CURRENT_USER, charName: CHAR.charName, itemId: it.id,
-    itemSnapshot: { kind:it.kind, price:it.price, vipPoints:it.vipPoints, matName:it.matName, matQty:it.matQty, name:it.name, slot:it.slot, rarity:it.rarity, statType:it.statType, statVal:it.statVal, levelReq:it.levelReq, icon:it.icon||null, emoji:it.emoji||null },
+    itemSnapshot: { kind:it.kind, price:it.price, packTitle:it.packTitle, vipPoints:it.vipPoints, matName:it.matName, matQty:it.matQty, name:it.name, slot:it.slot, rarity:it.rarity, statType:it.statType, statVal:it.statVal, levelReq:it.levelReq, icon:it.icon||null, emoji:it.emoji||null },
     status:'pending', ts: now,
   };
   try{
@@ -9902,6 +9992,7 @@ window.submitEventShopPayment = async function(){
 document.getElementById('openEventShopTab')?.addEventListener('click', ()=>{
   openTab('eventShopTab');
   renderEventShopTab();
+  try{ openEventShopNote(); }catch(e){}
 });
 function guildBossKey(guildId, bossId){ return 'guildBoss:'+guildId+':'+bossId; }
 // Lưu SỐ LƯỢT ĐÃ MUA từng vật phẩm của từng bang — kho còn lại = stock cấu hình (admin) trừ đi số đã mua.
@@ -10293,13 +10384,14 @@ window.attackGuildBossTurn = async function(){
     let dmg = rawDmg;
     try{
       if(typeof applyPveHit==='function'){
-        const _gbHit = applyPveHit(rawDmg, (typeof enemyEffectiveDodge==='function') ? enemyEffectiveDodge('gb', 0) : 0, myStat, gbMonsterArmorPool);
+        const _gbHit = applyPveHit(rawDmg, (typeof enemyEffectiveDodge==='function') ? enemyEffectiveDodge('gb', b.dodge||0) : (b.dodge||0), myStat, gbMonsterArmorPool);
         if(_gbHit.blocked>0){
           pushGbLog(`Boss đỡ đòn giảm ${_gbHit.blocked.toLocaleString('vi-VN')}`, '#7dd3fc');
           try{ spawnFloatTag('gb','mon', '🛡️ ĐỠ -'+_gbHit.blocked, '#7dd3fc'); }catch(e){}
         }
         if(_gbHit.absorbed>0){
           try{ spawnFloatTag('gb','mon', '🛡️ GIÁP -'+_gbHit.absorbed, '#f4d27a'); }catch(e){}
+          try{ if(typeof playShieldBlock==='function') playShieldBlock('gb','mon', _gbHit.absorbed); }catch(e){}
         }
         gbMonsterArmorPool = _gbHit.armorLeft;
         try{ updateArmorBarSide('gb','mon', gbMonsterArmorPool, gbMonsterArmorMax); }catch(e){}
@@ -12512,39 +12604,47 @@ window.adminBotTuLinhOnce = async function(){
       if(msg){ msg.textContent = 'Chưa cấu hình vật phẩm vòng quay Tụ Linh.'; msg.className = 'auth-msg err'; }
       return;
     }
-    const keys = await listBotKeys();
-    let ok = 0, skipGold = 0, skipNoChar = 0;
+    const wantBots = Math.max(1, Math.min(200, parseInt((document.getElementById('btl_botQty')||{}).value, 10) || 1));
+    const wantTimes = Math.max(1, Math.min(999, parseInt((document.getElementById('btl_spinQty')||{}).value, 10) || 1));
+    const keys = (await listBotKeys()).slice(0, wantBots);
+    let okSpins = 0, botsUsed = 0, botsEmptyGold = 0, skipNoChar = 0;
     for(const key of keys){
       const acc = await S.get(key);
       if(!acc || !acc.character){ skipNoChar++; continue; }
       const ch = acc.character;
-      if((ch.gold||0) < TULINH_SPIN_COST){ skipGold++; continue; }
-      ch.gold = (ch.gold||0) - TULINH_SPIN_COST;
       if(!ch.materials) ch.materials = {};
-      const reward = pickTuLinhReward();
-      if(reward && reward.matName){
-        ch.materials[reward.matName] = (ch.materials[reward.matName]||0) + Number(reward.qty||1);
+      let did = 0;
+      while(did < wantTimes && (ch.gold||0) >= TULINH_SPIN_COST){
+        ch.gold = (ch.gold||0) - TULINH_SPIN_COST;
+        const reward = pickTuLinhReward();
+        if(reward && reward.matName){
+          ch.materials[reward.matName] = (ch.materials[reward.matName]||0) + Number(reward.qty||1);
+        }
+        did++;
+        okSpins++;
       }
+      if(did === 0){ botsEmptyGold++; continue; }
       acc.character = ch;
       await S.set(key, acc);
       const username = String(key).replace(/^account:/,'');
       const ptsKey = 'tulinh:score:'+cycle.startAt+':'+username;
       const cur = Number(await S.get(ptsKey)) || 0;
-      await S.set(ptsKey, cur + TULINH_SPIN_POINTS);
-      ok++;
+      await S.set(ptsKey, cur + did * TULINH_SPIN_POINTS);
+      botsUsed++;
     }
     if(msg){
-      msg.textContent = `Xong 1 lượt: ${ok} bot triệu hồi. Bỏ qua thiếu vàng: ${skipGold}. Không có nhân vật: ${skipNoChar}.`;
+      msg.textContent = `Xong: ${botsUsed} bot triệu hồi ${okSpins} lần (tối đa ${wantTimes} lần/bot, ${wantBots} bot). Dừng vì hết vàng từ đầu: ${botsEmptyGold}. Không có nhân vật: ${skipNoChar}.`;
       msg.className = 'auth-msg ok';
     }
-    toast(`🤖 Bot Tụ Linh: ${ok} triệu hồi, ${skipGold} thiếu vàng`);
+    toast(`🤖 Bot Tụ Linh: ${okSpins} lần / ${botsUsed} bot`);
     try{ adminPreviewBotTuLinh(); }catch(e){}
   }catch(e){
     if(msg){ msg.textContent = 'Lỗi: '+(e.message||e); msg.className = 'auth-msg err'; }
   }finally{
-    if(btn){ btn.disabled = false; btn.textContent = '🌀 Bot triệu hồi Tụ Linh (1 nhấp = 1 lần / bot)'; }
+    if(btn){ btn.disabled = false; btn.textContent = '🌀 Bot triệu hồi Tụ Linh'; }
   }
 };
+
 window.adminStartTuLinhCycle = async function(){
   const now = Date.now();
   const cycle = { startAt: now, endAt: now + TULINH_CYCLE_MS };
@@ -13077,10 +13177,21 @@ async function claimTuLinhReward(cycleStartAt){
     if(rank && rank<=20){
       const cfg = (CONFIG.tuLinhTopRewards||[]).find(r=>Number(r.rank)===rank);
       const qty = cfg ? Number(cfg.qty)||0 : 0;
+      const extras = (cfg && Array.isArray(cfg.extras)) ? cfg.extras : [];
+      const got = [];
+      if(!CHAR.materials) CHAR.materials = {};
       if(qty>0){
         CHAR.materials[TUYET_AM_DAO_MAT_NAME] = (CHAR.materials[TUYET_AM_DAO_MAT_NAME]||0) + qty;
-        toast(`🏆 Tụ Linh: hạng ${rank} — nhận ${qty} Mảnh Tuyết Ẩm Đao!`);
-        pushLog(`🔮 Tụ Linh: hạng ${rank}, nhận ${qty} Mảnh Tuyết Ẩm Đao`, '#8a5cf6');
+        got.push(qty+' Mảnh Tuyết Ẩm Đao');
+      }
+      extras.forEach(e=>{
+        if(!e || !e.matName || !(Number(e.qty)>0)) return;
+        CHAR.materials[e.matName] = (CHAR.materials[e.matName]||0) + Number(e.qty);
+        got.push(e.qty+' '+e.matName);
+      });
+      if(got.length){
+        toast('🏆 Tụ Linh hạng '+rank+' — nhận '+got.join(', '));
+        pushLog('🔮 Tụ Linh hạng '+rank+': '+got.join(', '), '#8a5cf6');
       }
     }
   }catch(e){}
@@ -13166,12 +13277,13 @@ async function renderTuLinhTab(){
     }catch(e){}
     const cfg = (CONFIG.tuLinhTopRewards||[]).find(x=>Number(x.rank)===(i+1));
     const rewardQty = cfg ? Number(cfg.qty)||0 : 0;
-    return { ...r, charName, flag, rewardQty };
+    const rewardExtra = cfg ? tuLinhRankExtrasText(cfg) : '';
+    return { ...r, charName, flag, rewardQty, rewardExtra };
   }));
   const box = document.getElementById('tuLinhTopList');
   if(box){
     box.innerHTML = top20.length ? withNames.map((r,i)=>`
-      <div class="refine-row"><span>#${i+1} ${r.flag} <b>${r.charName}</b></span><span style="text-align:right;">${r.points.toLocaleString('vi-VN')} điểm${r.rewardQty>0 ? `<br><span style="color:var(--gold); font-size:10.5px; display:inline-flex; align-items:center; gap:4px;">🏆 +${r.rewardQty} <img src="${TUYET_AM_DAO_ICON}" style="width:24px;height:24px;object-fit:cover;border-radius:6px;vertical-align:middle;"> Mảnh Tuyết Ẩm Đao</span>` : ''}</span></div>
+      <div class="refine-row"><span>#${i+1} ${r.flag} <b>${r.charName}</b></span><span style="text-align:right;">${r.points.toLocaleString('vi-VN')} điểm${(r.rewardQty>0 || r.rewardExtra) ? `<br><span style="color:var(--gold); font-size:10.5px; display:inline-flex; align-items:center; gap:4px;flex-wrap:wrap;justify-content:flex-end;">🏆 ${r.rewardQty>0?`+${r.rewardQty} <img src="${TUYET_AM_DAO_ICON}" style="width:24px;height:24px;object-fit:cover;border-radius:6px;vertical-align:middle;"> Mảnh Tuyết Ẩm Đao`:''}${r.rewardExtra?((r.rewardQty>0?' · ':'')+r.rewardExtra):''}</span>` : ''}</span></div>
     `).join('') : `<div class="empty-note">Chưa có ai tham gia vòng này</div>`;
   }
 }
@@ -13290,20 +13402,60 @@ function renderAllGearCatalog(){
     return (a.name||'').localeCompare(b.name||'', 'vi');
   });
   if(countLbl) countLbl.textContent = `(${list.length} trang bị)`;
-  box.innerHTML = list.map(w=>{
+  window.__allGearCatalog = list.slice();
+  box.innerHTML = list.map((w,idx)=>{
     const rarity = w.rarity || 'trang';
     const meta = RARITY_META[rarity] || RARITY_META.trang;
-    const iconHtml = w._isTuyetAmDao ? tuyetAmDaoVideoHtml() : (w.emoji ? w.emoji : (w.icon ? `<img src="${w.icon}" style="width:100%;height:100%;object-fit:cover;">` : defaultStatIcon(w.slot||'weapon', rarity)));
-    const statLine = w._isTuyetAmDao ? `Báu vật · +25 Nộ khi vào trận, nâng sao +tốc độ` : `${slotLabel(w.slot||'weapon')} · Cấp ${w.levelReq||1}+ · +${w.statVal} ${statLabel(w.statType)}`;
-    return `<div class="gift-item-row">
-      <div class="gicon" style="background:${meta.color}33;">${iconHtml}</div>
-      <div style="flex:1; min-width:0;">
-        <div class="glabel" style="color:${meta.color}; font-weight:600;">${w.name} <span style="color:var(--text-dim); font-weight:400;">[${meta.label}]</span></div>
-        <div class="glabel">${statLine}</div>
-      </div>
+    const iconInner = w._isTuyetAmDao
+      ? `<div style="position:absolute;inset:4px;border-radius:8px;overflow:hidden;">${tuyetAmDaoVideoHtml()}</div>`
+      : (w.icon
+        ? `<img src="${w.icon}" style="position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);object-fit:cover;border-radius:8px;">`
+        : `<span style="font-size:22px;line-height:1;">${w.emoji || defaultStatIcon(w.slot||'weapon', rarity)}</span>`);
+    const tip = w._isTuyetAmDao
+      ? `${w.name} · Báu vật · +25 Nộ`
+      : `${w.name} [${meta.label}] · ${slotLabel(w.slot||'weapon')} · Cấp ${w.levelReq||1}+ · +${w.statVal} ${statLabel(w.statType)}`;
+    return `<div class="slot-box" title="${tip.replace(/"/g,'&quot;')}" style="border-color:${meta.color};background:${meta.color}22;cursor:pointer;" onclick="openCatalogGearNote(${idx})">
+      ${iconInner}
     </div>`;
   }).join('');
 }
+window.__allGearCatalog = [];
+function catalogGearNoteHtml(w){
+  if(!w) return '';
+  const rarity = w.rarity || 'trang';
+  const meta = RARITY_META[rarity] || RARITY_META.trang;
+  const slot = slotLabel(w.slot||'weapon');
+  if(w._isTuyetAmDao){
+    return `<div style="font-size:12.5px;line-height:1.7;">Báu vật <b>Tuyết Ẩm Đao</b> ghép từ mảnh Tụ Linh. Mang vào ô Báu vật: <b>+25 Nộ</b> khi vào trận. Nâng sao bằng mảnh — mỗi sao +${typeof TUYET_AM_DAO_SPEED_PER_STAR!=='undefined'?TUYET_AM_DAO_SPEED_PER_STAR:20} tốc độ.</div>`;
+  }
+  return `<div style="font-size:12.5px;line-height:1.7;">Trang bị <b>${slot}</b>, bậc <b style="color:${meta.color}">${meta.label}</b>. Yêu cầu cấp <b>${w.levelReq||1}</b>. Chỉ số gốc: <b>+${w.statVal||0} ${statLabel(w.statType)}</b>. Có thể cường hoá, nâng phẩm chất, thức tỉnh khi nhặt được trong game.</div>`;
+}
+window.openCatalogGearNote = function(idx){
+  const list = window.__allGearCatalog || [];
+  const w = list[idx];
+  if(!w) return;
+  try{ document.getElementById('catalogGearNoteOverlay')?.remove(); }catch(e){}
+  const rarity = w.rarity || 'trang';
+  const meta = RARITY_META[rarity] || RARITY_META.trang;
+  const iconInner = w._isTuyetAmDao ? tuyetAmDaoVideoHtml() : (w.icon ? `<img src="${w.icon}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<span style="font-size:28px;">${w.emoji||defaultStatIcon(w.slot||'weapon', rarity)}</span>`);
+  const ov = document.createElement('div');
+  ov.id = 'catalogGearNoteOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10020;background:rgba(4,6,10,.72);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  ov.innerHTML = `<div style="width:100%;max-width:340px;background:linear-gradient(180deg,#141a2c,#0b0e16);border:1px solid ${meta.color}55;border-radius:16px;padding:18px;" onclick="event.stopPropagation();">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:56px;height:56px;border-radius:12px;overflow:hidden;border:2px solid ${meta.color};background:#0c0e14;display:flex;align-items:center;justify-content:center;">${iconInner}</div>
+        <div>
+          <div style="font-weight:800;color:${meta.color};">${w.name}</div>
+          <div style="font-size:11px;color:var(--text-dim);">${meta.label} · ${slotLabel(w.slot||'weapon')} · Cấp ${w.levelReq||1}+</div>
+        </div>
+      </div>
+      ${catalogGearNoteHtml(w)}
+      <button class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="document.getElementById('catalogGearNoteOverlay')?.remove();">Đóng</button>
+    </div>`;
+  document.body.appendChild(ov);
+}
+
 function renderCharacterTab(){
   renderStatPointBox();
   renderEquipSlots();
@@ -13710,6 +13862,30 @@ window.openForeignItemDetailModal = function(id){
   document.getElementById('itemDetailContent').innerHTML = foreignItemDetailContentHtml(it);
   document.getElementById('itemDetailModal').classList.add('active');
 };
+
+function tuyetAmDaoItemUpgradeHtml(it){
+  if(!CHAR || !it || !it.rageBonus) return '';
+  const have = (CHAR.materials && CHAR.materials[TUYET_AM_DAO_MAT_NAME]) || 0;
+  const need = TUYET_AM_DAO_MAT_QTY;
+  const cap = RARITY_AWAKEN_CAP[it.rarity] || 6;
+  const cur = it.awakenStar || 0;
+  const maxed = cur >= cap;
+  const ready = have >= need;
+  const stars = '★'.repeat(cur) + '<span style="color:var(--text-dim);">' + '☆'.repeat(Math.max(0, cap-cur)) + '</span>';
+  let btn;
+  if(maxed){
+    btn = `<button class="btn btn-ghost" style="width:100%;opacity:.55;" disabled>Đã tối đa ${cap}★</button>`;
+  } else {
+    btn = `<button class="btn ${ready?'btn-primary':'btn-ghost'}" style="width:100%;${ready?'':'opacity:.55;'}" ${ready?'':'disabled'} onclick="craftTuyetAmDao();">${ready?`✨ Nâng lên ${cur+1}★ (tốn ${need} mảnh)`:`Chưa đủ mảnh (${have}/${need})`}</button>`;
+  }
+  return `<div class="refine-info" style="margin:0 0 12px;">
+      <div class="sec-label" style="margin:0 0 8px;">⭐ Nâng sao</div>
+      <div class="refine-row"><span>Sao hiện tại</span><b style="color:var(--gold);">${stars} ${cur}/${cap}</b></div>
+      <div class="refine-row" style="cursor:pointer;" onclick="openMaterialInfoModal('${TUYET_AM_DAO_MAT_NAME}')"><span>${materialIconHtml(TUYET_AM_DAO_MAT_NAME,16)} Mảnh đang có</span><b style="color:${ready?'var(--malachite)':'var(--text-dim)'}">${have}/${need}</b></div>
+      <div style="font-size:10.5px;color:var(--text-dim);line-height:1.5;margin:6px 0 8px;">Mỗi sao +${TUYET_AM_DAO_SPEED_PER_STAR} tốc độ. Mảnh lấy từ sự kiện Tụ Linh / vòng quay / Top 20.</div>
+      ${btn}
+    </div>`;
+}
 function itemDetailContentHtml(it){
   const slotKey = it.slot || 'weapon';
   const equipped = CHAR.equipped[slotKey] === it.id;
@@ -13731,6 +13907,7 @@ function itemDetailContentHtml(it){
       <div style="font-size:11px; color:var(--text-dim); text-align:center; margin-bottom:14px; line-height:1.6;">
         💠 Ghi chú: Báu vật được ghép từ ${TUYET_AM_DAO_MAT_QTY} mảnh Tuyết Ẩm Đao. Khi mang lên ô báu vật, nhân vật sẽ tự động có sẵn ${it.rageBonus} Nộ ngay khi bước vào Vượt Ải, Săn Boss, Boss Thế Giới, Boss Bang Hội và PK. Nếu đã có Tuyết Ẩm Đao rồi, mảnh tiếp theo sẽ dùng để nâng sao — mỗi sao +${TUYET_AM_DAO_SPEED_PER_STAR} tốc độ, tối đa ${RARITY_AWAKEN_CAP[it.rarity]||6} sao.
       </div>
+      ${tuyetAmDaoItemUpgradeHtml(it)}
       <button class="btn ${equipped?'btn-danger':'btn-primary'}" style="width:100%;" onclick="${equipped?`unequip('${slotKey}')`:`equipItem('${it.id}')`}">${equipped?'Gỡ trang bị':'Mang trang bị này'}</button>
     `;
   }
@@ -14551,12 +14728,15 @@ function updateDungeonQuotaText(mapId){
       else text += ` · ✅ Đã hạ hết quái ở bản đồ này`;
     }
     const purchasable = dungeonExtraPurchasableToday();
-    if(purchasable > 0) text += ` · 💎 Có thể mua thêm tối đa ${purchasable}/${dungeonExtraDailyCap()} lượt hôm nay (hạn mức chung mọi bản đồ)`;
-    else if(dungeonExtraDailyCap() > 0) text += ` · 💎 Đã dùng hết hạn mức mua thêm (${dungeonExtraDailyCap()}/ngày) hôm nay`;
+    const extraCap = dungeonExtraDailyCap();
+    const vipLv = vipLevelFor(CHAR.dcomRecharged);
+    if(extraCap <= 0) text += ` · 🔒 VIP ${vipLv} chưa mua thêm được lượt — cần VIP 1+`;
+    else if(purchasable > 0) text += ` · 💎 VIP ${vipLv} mua thêm còn ${purchasable}/${extraCap} lượt/ngày`;
+    else text += ` · 💎 VIP ${vipLv} đã hết hạn mức mua thêm (${extraCap}/ngày)`;
     quotaText.textContent = text;
     if(buyBox) buyBox.style.display = (remain <= 0 && purchasable > 0) ? 'block' : 'none';
     const buyBtn = document.getElementById('dungeonBuyExtraBtn');
-    if(buyBtn) buyBtn.textContent = `💎 Mua thêm lượt (${dungeonExtraCost()} Dcom/lượt) — còn ${purchasable}/${dungeonExtraDailyCap()} hôm nay`;
+    if(buyBtn) buyBtn.textContent = `💎 Mua thêm lượt (${dungeonExtraCost()} Dcom/lượt) — còn ${purchasable}/${extraCap} (VIP ${vipLv})`;
     const qtyInput = document.getElementById('dungeonBuyExtraQty');
     if(qtyInput) qtyInput.max = String(Math.max(1, purchasable));
   } else {
@@ -14686,7 +14866,7 @@ document.getElementById('dungeonBuyExtraBtn').addEventListener('click', async ()
   if(!qty || qty < 1) qty = 1;
   const purchasable = dungeonExtraPurchasableToday();
   if(purchasable <= 0){
-    toast(`Đã mua tối đa ${dungeonExtraDailyCap()} lượt hôm nay (áp dụng chung cho tất cả bản đồ). Hãy quay lại vào ngày mai.`);
+    toast(`VIP ${vipLevelFor(CHAR.dcomRecharged)} chỉ mua thêm được ${dungeonExtraDailyCap()} lượt/ngày. Lên VIP để tăng hạn mức.`);
     renderDungeonTab();
     return;
   }
@@ -14765,9 +14945,18 @@ function dungeonExtraCost(){
   return Math.max(1, Number(dungeonCfg().extraDcomCost)||DUNGEON_EXTRA_ENCOUNTER_DCOM_COST);
 }
 const DUNGEON_EXTRA_DAILY_CAP_FALLBACK = 50; // fallback nếu chưa lưu cấu hình
+function vipDungeonExtraCap(ch){
+  const c = ch || (typeof CHAR!=='undefined' ? CHAR : null);
+  if(!c) return 0;
+  const lvl = vipLevelFor(c.dcomRecharged);
+  if(lvl <= 0) return 0;
+  const arr = vipBenefitsList();
+  const custom = arr[lvl] && arr[lvl].dungeonExtra;
+  if(custom != null && custom !== '') return Math.max(0, Number(custom)||0);
+  return lvl * 10; // mặc định VIP1=10 ... VIP18=180
+}
 function dungeonExtraDailyCap(){
-  const v = dungeonCfg().extraDailyCap;
-  return Math.max(0, v != null ? Number(v)||0 : DUNGEON_EXTRA_DAILY_CAP_FALLBACK);
+  return vipDungeonExtraCap(typeof CHAR!=='undefined' ? CHAR : null);
 }
 // Tổng số lượt đã MUA THÊM (bằng Dcom) hôm nay, cộng dồn TẤT CẢ bản đồ — dùng để áp hạn mức chung tối đa mỗi ngày
 function dungeonExtraTotalToday(){
@@ -18716,22 +18905,40 @@ function renderTuLinhAdminList(){
     const sorted = (CONFIG.tuLinhTopRewards||[]).slice().sort((a,b)=>Number(a.rank)-Number(b.rank));
     rankBox.innerHTML = sorted.map(r=>`
       <div class="admin-list-item">
-        <span style="flex:1;">Hạng <b>${r.rank}</b> — ${r.qty} Mảnh Tuyết Ẩm Đao</span>
+        <span style="flex:1;">Hạng <b>${r.rank}</b> — ${r.qty} Mảnh Tuyết Ẩm Đao${tuLinhRankExtrasText(r) ? ' · '+tuLinhRankExtrasText(r) : ''}</span>
         <span style="display:flex; gap:6px; flex-shrink:0;">
           <button class="del" onclick="delCfg('tuLinhTopRewards','${r.id}')">✕</button>
         </span>
       </div>`).join('') || `<div class="empty-note">Chưa có cấu hình hạng nào</div>`;
   }
 }
+function tuLinhRankExtrasText(r){
+  const extras = (r && Array.isArray(r.extras)) ? r.extras.filter(e=>e && e.matName && Number(e.qty)>0) : [];
+  if(!extras.length) return '';
+  return extras.map(e=>'+'+e.qty+' '+e.matName).join(', ');
+}
 document.getElementById('tl_rankAdd').addEventListener('click', async ()=>{
+  if(!CONFIG.tuLinhTopRewards) CONFIG.tuLinhTopRewards = [];
   const rank = Math.min(20, Math.max(1, Number(document.getElementById('tl_rank').value)||1));
   const qty = Math.max(0, Number(document.getElementById('tl_rankQty').value)||0);
-  const existing = CONFIG.tuLinhTopRewards.find(x=>Number(x.rank)===rank);
-  if(existing){ existing.qty = qty; }
-  else { CONFIG.tuLinhTopRewards.push({ id:uid(), rank, qty }); }
+  const extraName = (document.getElementById('tl_extraName')&&document.getElementById('tl_extraName').value||'').trim();
+  const extraQty = Math.max(1, Number((document.getElementById('tl_extraQty')||{}).value)||1);
+  let existing = CONFIG.tuLinhTopRewards.find(x=>Number(x.rank)===rank);
+  if(!existing){
+    existing = { id:uid(), rank, qty, extras:[] };
+    CONFIG.tuLinhTopRewards.push(existing);
+  } else {
+    existing.qty = qty;
+    if(!Array.isArray(existing.extras)) existing.extras = [];
+  }
+  if(extraName){
+    const hit = existing.extras.find(e=>String(e.matName).toLowerCase()===extraName.toLowerCase());
+    if(hit) hit.qty = extraQty;
+    else existing.extras.push({ matName: extraName, qty: extraQty });
+  }
   await saveConfig('tuLinhTopRewards');
   renderTuLinhAdminList();
-  toast(`Đã lưu thưởng cho hạng ${rank}`);
+  toast(extraName ? `Đã lưu hạng ${rank}: ${qty} mảnh + ${extraQty} ${extraName}` : `Đã lưu thưởng mảnh cho hạng ${rank}`);
 });
 
 // 12. shop items
@@ -18861,17 +19068,19 @@ function renderVipBenefitInputs(){
     html += `<div class="field-row">
       <div class="mini-field"><label>VIP ${i} — EXP %</label><input type="number" id="vipBenExp_${i}" value="${(arr[i]&&arr[i].expPct)||0}" min="0" step="0.5"></div>
       <div class="mini-field"><label>VIP ${i} — Vàng %</label><input type="number" id="vipBenGold_${i}" value="${(arr[i]&&arr[i].goldPct)||0}" min="0" step="0.5"></div>
-    </div>`;
+    </div>
+    <div class="mini-field"><label>VIP ${i} — lượt Vượt Ải mua thêm / ngày</label><input type="number" id="vipBenDun_${i}" value="${(arr[i]&&arr[i].dungeonExtra)!=null?(arr[i].dungeonExtra):(i*10)}" min="0" step="1"></div>`;
   }
   box.innerHTML = html;
 }
 document.getElementById('vip_saveBenefits').addEventListener('click', async ()=>{
   const msg = document.getElementById('vip_benefitMsg');
-  const arr = [{expPct:0, goldPct:0}];
+  const arr = [{expPct:0, goldPct:0, dungeonExtra:0}];
   for(let i=1;i<19;i++){
     arr.push({
       expPct: Math.max(0, Number(document.getElementById('vipBenExp_'+i).value)||0),
       goldPct: Math.max(0, Number(document.getElementById('vipBenGold_'+i).value)||0),
+      dungeonExtra: Math.max(0, Number((document.getElementById('vipBenDun_'+i)||{}).value)||0),
     });
   }
   CONFIG.vipBenefits = arr;
@@ -19122,7 +19331,7 @@ function renderEventShopAdminList(){
     }
     const vipTxt = (it.vipPoints!=null) ? `${it.vipPoints} điểm VIP/lần` : `${(it.price||0).toLocaleString('vi-VN')} điểm VIP/lần (= Dcom nhận)`;
     return `<div class="refine-row" style="align-items:center; gap:8px; margin-bottom:6px;">
-      <span style="flex:1;"><b>${it.kind==='equipment'?it.name:it.matName}</b><br><span style="font-size:10px; color:var(--text-dim);">+${(it.price||0).toLocaleString('vi-VN')} Dcom · kèm ${desc} · ${vipTxt}<br>${limitTxt} · ${timeTxt}</span></span>
+      <span style="flex:1;"><b>${eventShopPackTitle(it)}</b><br><span style="font-size:10px; color:var(--text-dim);">${desc}${(it.price||0)>0?(' · +'+(it.price||0).toLocaleString('vi-VN')+' Dcom'):''} · ${vipTxt}<br>${limitTxt} · ${timeTxt}</span></span>
       <span style="display:flex; flex-direction:column; gap:4px; flex-shrink:0;">
         <button class="btn btn-ghost" style="padding:4px 8px; font-size:11px;" onclick="editEventShopAdmin('${it.id}')">Sửa</button>
         <button class="btn btn-ghost" style="padding:4px 8px; font-size:11px; color:var(--danger);" onclick="deleteEventShopAdmin('${it.id}')">Xóa</button>
@@ -19139,8 +19348,30 @@ function formatEventShopCountdown(ms){
 }
 function toggleEsFields(){
   const kind = document.getElementById('es_kind').value;
-  document.getElementById('es_materialFields').style.display = kind==='material' ? 'block' : 'none';
+  document.getElementById('es_materialFields').style.display = (kind==='material' || kind==='beastFrag' || kind==='treasureFrag') ? 'block' : 'none';
   document.getElementById('es_equipFields').style.display = kind==='equipment' ? 'block' : 'none';
+  const nameInp = document.getElementById('es_matName');
+  if(nameInp){
+    if(kind==='beastFrag'){
+      nameInp.value = (typeof BEAST_FRAGMENT_NAME!=='undefined') ? BEAST_FRAGMENT_NAME : 'Mảnh Thần Thú Thiên Lân';
+      nameInp.readOnly = true;
+    } else if(kind==='treasureFrag'){
+      nameInp.value = (typeof TUYET_AM_DAO_MAT_NAME!=='undefined') ? TUYET_AM_DAO_MAT_NAME : 'Mảnh Tuyết Ẩm Đao';
+      nameInp.readOnly = true;
+    } else {
+      nameInp.readOnly = false;
+    }
+  }
+}
+function eventShopPackTitle(it){
+  if(!it) return '';
+  if(it.packTitle && String(it.packTitle).trim()) return String(it.packTitle).trim();
+  if(it.kind==='beastFrag') return '+'+(it.matQty||1)+' Mảnh Thần Thú Thiên Lân';
+  if(it.kind==='treasureFrag') return '+'+(it.matQty||1)+' Mảnh Tuyết Ẩm Đao';
+  if(it.kind==='equipment') return it.name || 'Trang bị';
+  if(it.matName) return '+'+(it.matQty||1)+' '+it.matName;
+  if((it.price||0)>0) return '+'+(it.price||0).toLocaleString('vi-VN')+' Dcom';
+  return 'Gói nạp sự kiện';
 }
 document.getElementById('es_kind')?.addEventListener('change', toggleEsFields);
 window.editEventShopAdmin = function(id){
@@ -19149,7 +19380,8 @@ window.editEventShopAdmin = function(id){
   document.getElementById('es_editId').value = it.id;
   document.getElementById('es_kind').value = it.kind;
   toggleEsFields();
-  document.getElementById('es_price').value = it.price||1;
+  const pti = document.getElementById('es_packTitle'); if(pti) pti.value = it.packTitle||'';
+  document.getElementById('es_price').value = it.price||0;
   document.getElementById('es_limit').value = it.limit||0;
   document.getElementById('es_durationHours').value = it.durationHours||0;
   document.getElementById('es_vipPoints').value = it.vipPoints!=null ? it.vipPoints : '';
@@ -19190,7 +19422,8 @@ function cancelEditEventShop(){
   document.getElementById('es_eqStatType').value = 'atk';
   document.getElementById('es_eqStatVal').value = 10;
   document.getElementById('es_eqLevelReq').value = 1;
-  document.getElementById('es_price').value = 100;
+  const pti2 = document.getElementById('es_packTitle'); if(pti2) pti2.value = '';
+  document.getElementById('es_price').value = 0;
   document.getElementById('es_limit').value = 0;
   document.getElementById('es_durationHours').value = 0;
   document.getElementById('es_vipPoints').value = '';
@@ -19208,7 +19441,8 @@ document.getElementById('es_saveTitle')?.addEventListener('click', async ()=>{
 });
 document.getElementById('es_save')?.addEventListener('click', async ()=>{
   const kind = document.getElementById('es_kind').value;
-  const price = Math.max(1, Number(document.getElementById('es_price').value)||1);
+  const price = Math.max(0, Number(document.getElementById('es_price').value)||0);
+  const packTitle = (document.getElementById('es_packTitle')&&document.getElementById('es_packTitle').value||'').trim();
   const limit = Math.max(0, Number(document.getElementById('es_limit').value)||0);
   const durationHours = Math.max(0, Number(document.getElementById('es_durationHours').value)||0);
   const vipPointsRaw = document.getElementById('es_vipPoints').value;
@@ -19218,7 +19452,7 @@ document.getElementById('es_save')?.addEventListener('click', async ()=>{
     const name = (document.getElementById('es_eqName').value||'').trim();
     if(!name){ toast('Nhập tên trang bị'); return; }
     data = {
-      kind, price, limit, durationHours, vipPoints, name,
+      kind, price, packTitle, limit, durationHours, vipPoints, name,
       slot: document.getElementById('es_eqSlot').value,
       rarity: document.getElementById('es_eqRarity').value,
       statType: document.getElementById('es_eqStatType').value,
@@ -19226,9 +19460,11 @@ document.getElementById('es_save')?.addEventListener('click', async ()=>{
       levelReq: Math.max(0, Number(document.getElementById('es_eqLevelReq').value)||0),
     };
   } else {
-    const matName = (document.getElementById('es_matName').value||'').trim();
+    let matName = (document.getElementById('es_matName').value||'').trim();
+    if(kind==='beastFrag') matName = (typeof BEAST_FRAGMENT_NAME!=='undefined') ? BEAST_FRAGMENT_NAME : 'Mảnh Thần Thú Thiên Lân';
+    if(kind==='treasureFrag') matName = (typeof TUYET_AM_DAO_MAT_NAME!=='undefined') ? TUYET_AM_DAO_MAT_NAME : 'Mảnh Tuyết Ẩm Đao';
     if(!matName){ toast('Nhập tên nguyên liệu'); return; }
-    data = { kind, price, limit, durationHours, vipPoints, matName, matQty: Math.max(1, Number(document.getElementById('es_matQty').value)||1) };
+    data = { kind, price, packTitle, limit, durationHours, vipPoints, matName, matQty: Math.max(1, Number(document.getElementById('es_matQty').value)||1) };
   }
   if(!CONFIG.eventShopItems) CONFIG.eventShopItems = [];
   const editId = document.getElementById('es_editId').value;
@@ -19301,7 +19537,7 @@ window.approveEventShopReq = async function(id){
   await S.set('eventShopReq:'+id, req);
   renderEventShopReqAdminList();
   const newVip = vipLevelFor(ch.dcomRecharged);
-  toast(`Đã duyệt +${price} Dcom cho ${req.charName||req.username} (VIP ${newVip})`);
+  toast(`Đã duyệt «${eventShopPackTitle(snap)}» cho ${req.charName||req.username} (VIP ${newVip})`);
 };
 window.rejectEventShopReq = async function(id){
   const req = await S.get('eventShopReq:'+id);
@@ -19476,7 +19712,7 @@ function renderGuildBossAdminList(){
   box.innerHTML = list.map((b,idx)=>`
     <div class="refine-row" style="align-items:flex-start;gap:8px;margin-bottom:6px;">
       <span style="flex:1;">${b.icon||'👹'} <b>${b.name}</b><br>
-        <span style="font-size:10px;color:var(--text-dim);">ID: ${b.id} · Mở Cấp ${b.unlockGuildLevel} · HP ${(b.maxHp||0).toLocaleString('vi-VN')} · ATK ${b.atk||0} · Xuyên ${b.pierce||0}${b.rageSkillId?(' · 🔥 '+((typeof enemyRageSkillLabel==='function'?enemyRageSkillLabel(b.rageSkillId):b.rageSkillId))):''}${b.battleVisual?(' · Hình '+(b.battleVisual==='dragon'?'Rồng':b.battleVisual==='archer'?'Cung thủ':b.battleVisual==='demon'?'Quỷ dữ':'Quái động')):''}</span>
+        <span style="font-size:10px;color:var(--text-dim);">ID: ${b.id} · Mở Cấp ${b.unlockGuildLevel} · HP ${(b.maxHp||0).toLocaleString('vi-VN')} · ATK ${b.atk||0} · Đỡ ${b.dodge||0} · Xuyên ${b.pierce||0}${b.rageSkillId?(' · 🔥 '+((typeof enemyRageSkillLabel==='function'?enemyRageSkillLabel(b.rageSkillId):b.rageSkillId))):''}${b.battleVisual?(' · Hình '+(b.battleVisual==='dragon'?'Rồng':b.battleVisual==='archer'?'Cung thủ':b.battleVisual==='demon'?'Quỷ dữ':'Quái động')):''}</span>
       </span>
       <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="editGuildBossAdmin(${idx})">Sửa</button>
       <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;color:var(--danger);" onclick="deleteGuildBossAdmin(${idx})">Xóa</button>
@@ -19493,6 +19729,7 @@ window.editGuildBossAdmin = function(idx){
   document.getElementById('gb_unlock').value = b.unlockGuildLevel||4;
   document.getElementById('gb_maxHp').value = b.maxHp||1000000;
   document.getElementById('gb_atk').value = b.atk||500;
+  const gd = document.getElementById('gb_dodge'); if(gd) gd.value = b.dodge||0;
   document.getElementById('gb_skillEvery').value = b.skillEvery||3;
   document.getElementById('gb_skillMult').value = b.skillDmgMult||2;
   document.getElementById('gb_skillName').value = b.skillName||'';
@@ -19521,6 +19758,7 @@ window.saveGuildBossAdmin = async function(){
     unlockGuildLevel: parseInt(document.getElementById('gb_unlock').value,10)||1,
     maxHp: parseInt(document.getElementById('gb_maxHp').value,10)||1000000,
     atk: parseInt(document.getElementById('gb_atk').value,10)||500,
+    dodge: parseInt((document.getElementById('gb_dodge')||{}).value,10)||0,
     skillEvery: parseInt(document.getElementById('gb_skillEvery').value,10)||3,
     skillDmgMult: parseFloat(document.getElementById('gb_skillMult').value)||2,
     skillName: document.getElementById('gb_skillName').value||'',
